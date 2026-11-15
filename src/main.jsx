@@ -55,14 +55,14 @@ const strengths = [
 ]
 
 const metrics = [
-  { value: 10, suffix: 'W+', label: '业务数据处理量', spark: [2, 4, 3, 6, 8, 11, 14, 16] },
-  { value: 98.7, suffix: '%', label: 'ETL 数据准确率', decimals: 1, spark: [70, 82, 88, 93, 96, 97, 98.4, 98.7] },
-  { value: 93.7, suffix: '%', label: '故障识别准确率', decimals: 1, spark: [58, 66, 74, 80, 86, 90, 92.4, 93.7] },
-  { value: 4, suffix: '', label: '核心建模项目', spark: [1, 1, 2, 2, 3, 3, 4, 4] },
+  { value: 10, suffix: 'W+', label: '业务数据处理量', source: '广西北海市救助站 · 2026.01—03' },
+  { value: 98.7, suffix: '%', label: 'ETL 数据准确率', decimals: 1, source: '清洗后逐条校验结果' },
+  { value: 93.7, suffix: '%', label: '故障识别准确率', decimals: 1, source: '工业设备检测项目 · 2026.04—05' },
+  { value: 4, suffix: '', label: '核心建模项目', source: '见下方 SELECTED WORK' },
 ]
 
-/* 进入视口后：数字滚动到位 + 趋势线绘制。锚点跳转直接补齐终态 */
-function Metric({ value, decimals = 0, suffix, label, spark }) {
+/* 进入视口后数字滚动到位。锚点跳转直接补齐终态，不能停在 0 */
+function Metric({ value, decimals = 0, suffix, label, source }) {
   const numRef = useRef(null)
   const boxRef = useRef(null)
 
@@ -74,7 +74,6 @@ function Metric({ value, decimals = 0, suffix, label, spark }) {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { finish(); return }
     node.textContent = (0).toFixed(decimals)
     const io = new IntersectionObserver(([entry]) => {
-      // 已经滚过去了（锚点跳转）也要补齐，不能停在 0
       if (!entry.isIntersecting && entry.boundingClientRect.top > 0) return
       io.disconnect()
       const counter = { v: 0 }
@@ -91,21 +90,11 @@ function Metric({ value, decimals = 0, suffix, label, spark }) {
 
   return (
     <div ref={boxRef}>
-      <strong><span ref={numRef}/><sup>{suffix}</sup></strong>
-      <svg className="metric-spark" viewBox="0 0 120 34" aria-hidden="true" preserveAspectRatio="none">
-        <path className="metric-spark-area" d={`M0 34 L ${sparkPath(spark)} L 120 34Z`}/>
-        <path className="metric-spark-line" d={`M ${sparkPath(spark)}`}/>
-      </svg>
+      <strong><span className="metric-num" ref={numRef}/><sup>{suffix}</sup></strong>
       <span>{label}</span>
+      <em className="metric-src">{source}</em>
     </div>
   )
-}
-
-function sparkPath(points) {
-  const w = 120, h = 34, max = Math.max(...points), min = Math.min(...points)
-  return points
-    .map((p, i) => `${(i / (points.length - 1) * w).toFixed(1)} ${(h - ((p - min) / (max - min || 1)) * (h - 8) - 4).toFixed(1)}`)
-    .join(' L ')
 }
 
 /* 靠近时轻微吸附的按钮 */

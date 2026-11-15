@@ -21,19 +21,22 @@ body {
 .magnetic { display: inline-flex; will-change: transform; }
 .nav-contact-wrap { display: inline-flex; }
 
-/* ══════════ 指标：数字滚动 + 迷你趋势线 ══════════ */
+/* ══════════ 指标：数字滚动 + 数据来源标注 ══════════ */
 .metrics > div { position: relative; }
 .metrics strong { font-variant-numeric: tabular-nums; }
-.metric-spark { display: block; width: 100%; height: 34px; margin-top: 16px; overflow: visible; }
-.metric-spark-area { fill: rgba(124, 236, 255, .09); stroke: none; opacity: 0; transition: opacity .9s ease .5s; }
-.metric-spark-line {
-  fill: none; stroke: var(--accent); stroke-width: 1.6;
-  vector-effect: non-scaling-stroke;
-  stroke-dasharray: 420; stroke-dashoffset: 420;
+/* 原站 .metrics span 规则会把 strong 里的数字 span 一起命中成 11px 灰字，这里显式复位 */
+.metrics strong .metric-num {
+  display: inline; margin: 0; font-size: inherit; line-height: inherit;
+  letter-spacing: inherit; color: inherit; font-family: inherit; font-weight: inherit;
 }
-.metrics div.is-in .metric-spark-line { animation: spark-draw 1.6s cubic-bezier(.2, .7, .2, 1) .2s forwards; }
-.metrics div.is-in .metric-spark-area { opacity: 1; }
-@keyframes spark-draw { to { stroke-dashoffset: 0; } }
+.metric-src {
+  display: block; margin-top: 12px; padding-top: 12px; max-width: 260px;
+  font: 400 9px/1.6 'DM Mono'; letter-spacing: .1em; font-style: normal;
+  color: #6b737e; border-top: 1px solid rgba(255, 255, 255, .07);
+}
+.metric-src::before { content: "来源 / "; color: #565e68; }
+.metrics div.is-in .metric-src { animation: src-in .8s ease both; }
+@keyframes src-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* ══════════ 经历行：可点击按钮 ══════════ */
 .experience-title small {
@@ -203,7 +206,7 @@ body.exp-open .scroll-progress { opacity: 0; transition: opacity .3s ease; }
   filter: saturate(.86) brightness(.9);
   transition: transform 1.1s cubic-bezier(.2, .7, .2, 1), filter .5s;
 }
-.exp-shot:hover { border-color: rgba(124, 236, 255, .55); transform: translateY(-3px); }
+.exp-shot:hover { border-color: rgba(241, 65, 32, .6); transform: translateY(-3px); }
 .exp-shot:hover img { transform: scale(1.07); filter: saturate(1) brightness(1); }
 .exp-shot:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
 .exp-shot-no {
@@ -241,7 +244,7 @@ body.exp-open .scroll-progress { opacity: 0; transition: opacity .3s ease; }
 }
 .exp-footnav button:first-child { text-align: left; }
 .exp-footnav button:last-child { text-align: right; align-items: flex-end; }
-.exp-footnav button:hover { background: #0e1319; border-color: rgba(124, 236, 255, .4); }
+.exp-footnav button:hover { background: #0e1319; border-color: rgba(241, 65, 32, .45); }
 .exp-footnav small { font: 400 9px/1 'DM Mono'; letter-spacing: .14em; color: #6d7580; }
 .exp-footnav strong { font-size: 15px; font-weight: 400; color: #dbe0e6; }
 
@@ -282,8 +285,7 @@ body.exp-open .scroll-progress { opacity: 0; transition: opacity .3s ease; }
   .exp-sheet { transition: none; transform: none; }
   .exp-rise, .exp-shot { animation: none; }
   .exp-hero-img { animation: none; }
-  .metric-spark-line { animation: none !important; stroke-dashoffset: 0; }
-  .metric-spark-area { opacity: 1 !important; transition: none; }
+  .metric-src { animation: none !important; opacity: 1; }
   .exp-hover-preview { display: none; }
 }
 
