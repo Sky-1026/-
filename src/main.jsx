@@ -2,8 +2,9 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import BorderGlow from './BorderGlow'
+import ExperienceList from './Experience'
 import './styles.css'
+import './experience.css'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -53,15 +54,101 @@ const strengths = [
   { id: 'D', title: '团队领导', text: '担任大数据 2401 班班长并多次带队参加建模竞赛，负责任务拆解、算法实现与论文交付；带领班级获评校级优良学风班。', detail: 'Leadership · Writing · CET-4 · C1' },
 ]
 
-const experience = [
-  ['2026.07—09', '汕尾汇能综合服务有限公司', '电力工程技术管理 · 台风抢修复电表彰'],
-  ['2026.01—03', '广西北海市救助站', '政策研究数据分析支持 · 10W+ 数据 ETL'],
-  ['2025.06—2026.02', '华北电力大学学生处', '学生助理 · 档案数据自动化处理'],
-  ['2024.11—至今', '华电 Hunters 实验室', '机器人与嵌入式开发训练'],
-  ['2024.09—至今', '大数据 2401 班', '班长 · 2025 年度校级优良学风班'],
-  ['2024.09—至今', '华北电力大学校拔河队', '成员 · 核心发力位'],
-  ['2024.09—至今', '华北电力大学', '数据科学本科 · 数据库 99 / 概率论 92'],
+const metrics = [
+  { value: 10, suffix: 'W+', label: '业务数据处理量', spark: [2, 4, 3, 6, 8, 11, 14, 16] },
+  { value: 98.7, suffix: '%', label: 'ETL 数据准确率', decimals: 1, spark: [70, 82, 88, 93, 96, 97, 98.4, 98.7] },
+  { value: 93.7, suffix: '%', label: '故障识别准确率', decimals: 1, spark: [58, 66, 74, 80, 86, 90, 92.4, 93.7] },
+  { value: 4, suffix: '', label: '核心建模项目', spark: [1, 1, 2, 2, 3, 3, 4, 4] },
 ]
+
+/* 进入视口后：数字滚动到位 + 趋势线绘制。锚点跳转直接补齐终态 */
+function Metric({ value, decimals = 0, suffix, label, spark }) {
+  const numRef = useRef(null)
+  const boxRef = useRef(null)
+
+  useEffect(() => {
+    const node = numRef.current
+    const box = boxRef.current
+    if (!node || !box) return
+    const finish = () => { node.textContent = value.toFixed(decimals); box.classList.add('is-in') }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { finish(); return }
+    node.textContent = (0).toFixed(decimals)
+    const io = new IntersectionObserver(([entry]) => {
+      // 已经滚过去了（锚点跳转）也要补齐，不能停在 0
+      if (!entry.isIntersecting && entry.boundingClientRect.top > 0) return
+      io.disconnect()
+      const counter = { v: 0 }
+      box.classList.add('is-in')
+      gsap.to(counter, {
+        v: value, duration: 1.7, ease: 'power3.out',
+        onUpdate: () => { node.textContent = counter.v.toFixed(decimals) },
+        onComplete: () => { node.textContent = value.toFixed(decimals) },
+      })
+    }, { threshold: .4 })
+    io.observe(node)
+    return () => io.disconnect()
+  }, [value, decimals])
+
+  return (
+    <div ref={boxRef}>
+      <strong><span ref={numRef}/><sup>{suffix}</sup></strong>
+      <svg className="metric-spark" viewBox="0 0 120 34" aria-hidden="true" preserveAspectRatio="none">
+        <path className="metric-spark-area" d={`M0 34 L ${sparkPath(spark)} L 120 34Z`}/>
+        <path className="metric-spark-line" d={`M ${sparkPath(spark)}`}/>
+      </svg>
+      <span>{label}</span>
+    </div>
+  )
+}
+
+function sparkPath(points) {
+  const w = 120, h = 34, max = Math.max(...points), min = Math.min(...points)
+  return points
+    .map((p, i) => `${(i / (points.length - 1) * w).toFixed(1)} ${(h - ((p - min) / (max - min || 1)) * (h - 8) - 4).toFixed(1)}`)
+    .join(' L ')
+}
+
+/* 靠近时轻微吸附的按钮 */
+function Magnetic({ children, strength = .28, className = '', ...rest }) {
+  const ref = useRef(null)
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const move = e => {
+      const r = node.getBoundingClientRect()
+      const x = (e.clientX - (r.left + r.width / 2)) * strength
+      const y = (e.clientY - (r.top + r.height / 2)) * strength
+      gsap.to(node, { x, y, duration: .7, ease: 'power3.out' })
+    }
+    const leave = () => gsap.to(node, { x: 0, y: 0, duration: .9, ease: 'elastic.out(1, .4)' })
+    node.addEventListener('pointermove', move)
+    node.addEventListener('pointerleave', leave)
+    return () => { node.removeEventListener('pointermove', move); node.removeEventListener('pointerleave', leave) }
+  }, [strength])
+  return <span ref={ref} className={`magnetic ${className}`} {...rest}>{children}</span>
+}
+
+/* 顶部阅读进度线 */
+function ScrollProgress() {
+  const ref = useRef(null)
+  useEffect(() => {
+    let frame = 0
+    const update = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight
+      const p = max > 0 ? window.scrollY / max : 0
+      if (ref.current) ref.current.style.transform = `scaleX(${p.toFixed(4)})`
+      frame = 0
+    }
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(update) }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll)
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); cancelAnimationFrame(frame) }
+  }, [])
+  return <div className="scroll-progress" aria-hidden="true"><i ref={ref}/></div>
+}
 
 function Arrow({ diagonal = false }) {
   return <span className={diagonal ? 'arrow arrow-diagonal' : 'arrow'} aria-hidden="true">↗</span>
@@ -244,6 +331,9 @@ function App() {
       if (pointerFrame) return
       pointerFrame = requestAnimationFrame(() => {
         if (cursorRef.current) cursorRef.current.style.transform = `translate3d(${pointerX}px, ${pointerY}px, 0)`
+        const root = document.documentElement
+        root.style.setProperty('--mx', `${pointerX}px`)
+        root.style.setProperty('--my', `${pointerY}px`)
         pointerFrame = 0
       })
     }
@@ -280,12 +370,15 @@ function App() {
         </div>
       </div>
       <div className="cursor" ref={cursorRef}/>
+      <ScrollProgress/>
       <header className={`nav shell${navFloating ? ' is-scrolled' : ''}`}>
         <a className="monogram" href="#home" aria-label="返回首页">LXJ<span>®</span></a>
         <nav aria-label="主导航">
           <a href="#about">关于</a><a href="#work">项目</a><a href="#strengths">能力</a>
         </nav>
-        <a className="nav-contact" href="mailto:120241050109@ncepu.edu.cn">联系我 <Arrow/></a>
+        <Magnetic className="nav-contact-wrap">
+          <a className="nav-contact" href="mailto:120241050109@ncepu.edu.cn">联系我 <Arrow/></a>
+        </Magnetic>
       </header>
 
       <section className="hero" id="home">
@@ -307,7 +400,7 @@ function App() {
           <div className="hero-motion-caption" aria-hidden="true"><span>GENERATIVE FIELD / 01</span><small>DATA IN MOTION</small></div>
           <div className="hero-bottom">
             <div className="hero-intro"><small>PORTFOLIO / 2026</small><p>数据科学与大数据技术<br/>华北电力大学 · 北京</p></div>
-            <a href="#work" className="hero-cta" aria-label="查看精选项目"><span>EXPLORE WORK</span><Arrow diagonal/></a>
+            <a href="#work" className="hero-cta" aria-label="查看精选项目"><Magnetic className="hero-cta-inner"><span>EXPLORE WORK</span><Arrow diagonal/></Magnetic></a>
           </div>
         </div>
         <div className="hero-index">DATA × ENERGY × MODELING</div>
@@ -332,33 +425,10 @@ function App() {
           </div>
         </div>
         <div className="metrics" data-reveal>
-          <div><strong>10W<sup>+</sup></strong><span>业务数据处理量</span></div>
-          <div><strong>98.7<sup>%</sup></strong><span>ETL 数据准确率</span></div>
-          <div><strong>93.7<sup>%</sup></strong><span>故障识别准确率</span></div>
-          <div><strong>04</strong><span>核心建模项目</span></div>
+          {metrics.map(m => <Metric key={m.label} {...m}/>)}
         </div>
         <div className="experience" data-reveal>
-          <div className="experience-title">SELECTED EXPERIENCE</div>
-          <div className="experience-list">
-            {experience.map(([date, org, role], index) => (
-              <BorderGlow
-                key={`${date}-${org}-${role}`}
-                className="experience-glow-card"
-                edgeSensitivity={24}
-                glowColor="8 88 60"
-                backgroundColor="#0b0d11"
-                borderRadius={18}
-                glowRadius={28}
-                glowIntensity={.82}
-                coneSpread={20}
-                animated={index === 0}
-                fillOpacity={.3}
-                colors={['#f14120', '#ff8a5c', '#7a1324']}
-              >
-                <div className="experience-row"><time>{date}</time><strong>{org}</strong><span>{role}</span><Arrow/></div>
-              </BorderGlow>
-            ))}
-          </div>
+          <ExperienceList/>
         </div>
       </section>
 
