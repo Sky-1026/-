@@ -12,8 +12,8 @@ const projects = [
     number: '01',
     title: '电力期权定价',
     en: 'POWER OPTION PRICING',
-    meta: '多模型协同优化研究 · 组长 · 2025—至今',
-    description: '面向新能源高比例接入场景，搭建“场景划分—价差预测—动态定价”全链路体系，用 Bachelier 引擎适配负电价极端场景。',
+    meta: '多模型协同优化研究 · 组长 · 2025.11—至今',
+    description: '整合广西光伏、山西风电两省 8760+ 小时级数据，搭建“场景划分—价差预测—动态定价”全链路体系，用 Bachelier 引擎适配负电价极端场景。',
     tags: ['K-Means', 'LSTM', 'Bachelier', 'L-BFGS-B'],
     art: 'energy',
   },
@@ -21,8 +21,8 @@ const projects = [
     number: '02',
     title: '工业设备检测',
     en: 'EQUIPMENT DIAGNOSTICS',
-    meta: '北京大学生数学建模与计算机应用竞赛 · 队长 · 2026',
-    description: '融合时域、频域特征与注意力 CNN-LSTM，构建异常预筛选到故障识别的分层检测流程，适配缺失、噪声与小样本场景。',
+    meta: '北京大学生数学建模与计算机应用竞赛 · 队长 · 2026.04—05 · 三等奖',
+    description: '融合时域、频域特征与注意力 CNN-LSTM，结合孤立森林与 DBSCAN 构建分层检测流程，故障识别准确率提升至 93.7%，误报率降低 28%。',
     tags: ['CNN-LSTM', 'FFT', 'Isolation Forest', 'DBSCAN'],
     art: 'signal',
   },
@@ -30,8 +30,8 @@ const projects = [
     number: '03',
     title: '烟幕投放策略',
     en: 'TACTICAL OPTIMIZATION',
-    meta: '全国大学生数学建模大赛 · 队长 · 北京市二等奖',
-    description: '建立无人机、导弹与烟幕的多对象运动学模型，通过混合优化算法平衡弹药用量与有效遮蔽时间。',
+    meta: '全国大学生数学建模竞赛 · 队长 · 2025.09—10 · 北京二等奖',
+    description: '建立无人机、导弹与烟幕的多对象运动学模型，通过遗传算法、改进粒子群与二分法平衡弹药用量和有效遮蔽时间，求解效率提升 40% 以上。',
     tags: ['遗传算法', '粒子群', '二分法', '运动学建模'],
     art: 'trajectory',
   },
@@ -39,25 +39,28 @@ const projects = [
     number: '04',
     title: '交通流量建模',
     en: 'TRAFFIC FLOW MODELING',
-    meta: '五一数学建模竞赛 · 队长 · 全国二等奖',
-    description: '以分段线性与正弦周期函数解释道路流量，在八项工程约束下完成参数优化，并以 Huber 损失增强抗噪稳定性。',
+    meta: '第二十二届五一数学建模竞赛 · 队长 · 2025.05—06 · 全国二等奖',
+    description: '以分段线性与正弦周期函数解释道路流量，在八项工程约束下完成参数优化，并以 Huber 损失增强抗噪稳定性，含噪声数据下稳定性提升 30% 以上。',
     tags: ['鲁棒回归', 'Huber Loss', '最小二乘', '参数优化'],
     art: 'traffic',
   },
 ]
 
 const strengths = [
-  { id: 'A', title: '数据工程', text: '从 10 万+ 条业务数据清洗，到跨源时间对齐、特征工程与自动化 ETL，能把混乱数据变成可靠的研究底座。', detail: 'Python · Pandas · SQL · Excel' },
+  { id: 'A', title: '数据工程', text: '从 10 万+ 条业务数据清洗，到跨源时间对齐、特征工程与自动化 ETL，能把混乱数据变成可靠的研究底座。', detail: 'Python · SQL · Java · C · Excel/WPS' },
   { id: 'B', title: '算法建模', text: '善于把真实问题抽象为可求解模型，在时序预测、聚类、异常检测与约束优化之间选择合理路径。', detail: 'ML · Optimization · Time Series' },
   { id: 'C', title: '业务落地', text: '既能下场调研、理解一线业务，也能将分析结果转译成可视化看板、风险区域与决策依据。', detail: 'Research · Dashboard · Delivery' },
-  { id: 'D', title: '团队领导', text: '多次担任建模队长与班长，负责从任务拆解、算法实现到论文交付的完整协作闭环。', detail: 'Leadership · Writing · Execution' },
+  { id: 'D', title: '团队领导', text: '担任大数据 2401 班班长并多次带队参加建模竞赛，负责任务拆解、算法实现与论文交付；带领班级获评校级优良学风班。', detail: 'Leadership · Writing · CET-4 · C1' },
 ]
 
 const experience = [
-  ['2026.07—09', '汕尾汇能综合服务有限公司', '电力工程技术管理岗实习生'],
-  ['2026.01—03', '广西北海市救助站', '政策研究数据分析支持岗'],
-  ['2024.11—至今', '华电 Hunters 实验室', '成员 / 机器人与嵌入式训练'],
-  ['2024.09—至今', '华北电力大学', '数据科学与大数据技术本科'],
+  ['2026.07—09', '汕尾汇能综合服务有限公司', '电力工程技术管理 · 台风抢修复电表彰'],
+  ['2026.01—03', '广西北海市救助站', '政策研究数据分析支持 · 10W+ 数据 ETL'],
+  ['2025.06—2026.02', '华北电力大学学生处', '学生助理 · 档案数据自动化处理'],
+  ['2024.11—至今', '华电 Hunters 实验室', '机器人与嵌入式开发训练'],
+  ['2024.09—至今', '大数据 2401 班', '班长 · 2025 年度校级优良学风班'],
+  ['2024.09—至今', '华北电力大学校拔河队', '成员 · 核心发力位'],
+  ['2024.09—至今', '华北电力大学', '数据科学本科 · 数据库 99 / 概率论 92'],
 ]
 
 function Arrow({ diagonal = false }) {
@@ -321,7 +324,7 @@ function App() {
           </div>
           <div className="about-copy" data-reveal>
             <p className="lead">我是刘兴技，华北电力大学数据科学与大数据技术专业大三学生。关注数据如何进入真实场景——能源、公共服务、工业设备，以及每一个可以被更好理解的问题。</p>
-            <p>我喜欢从业务现场开始：清洗数据、建立假设、构造模型，再把结果变成能被使用的工具与结论。多次建模竞赛队长经历，也让我习惯为复杂协作找到清晰的推进路径。</p>
+            <p>我喜欢从业务现场开始：清洗数据、建立假设、构造模型，再把结果变成能被使用的工具与结论。建模竞赛队长、班长与学生助理经历，也让我习惯为复杂协作找到清晰的推进路径。</p>
             <div className="contact-lines">
               <a href="tel:18601916588"><span>PHONE</span>186 0191 6588</a>
               <a href="mailto:120241050109@ncepu.edu.cn"><span>MAIL</span>120241050109@ncepu.edu.cn</a>
@@ -339,7 +342,7 @@ function App() {
           <div className="experience-list">
             {experience.map(([date, org, role], index) => (
               <BorderGlow
-                key={org}
+                key={`${date}-${org}-${role}`}
                 className="experience-glow-card"
                 edgeSensitivity={24}
                 glowColor="8 88 60"
@@ -384,7 +387,7 @@ function App() {
         <div className="strength-grid">
           {strengths.map(s => <article key={s.id} className="strength-card" data-reveal><span className="strength-id">{s.id}</span><div><h3>{s.title}</h3><p>{s.text}</p><small>{s.detail}</small></div><Arrow/></article>)}
         </div>
-        <div className="honors" data-reveal><span>RECENT RECOGNITION</span><p>全国大学生数学建模竞赛 北京二等奖 · 五一数学建模竞赛 全国二等奖 · 首都高校拔河锦标赛 冠军</p></div>
+        <div className="honors" data-reveal><span>RECENT RECOGNITION</span><p>全国大学生数学建模竞赛 北京二等奖 · 五一数学建模竞赛 全国二等奖 · 北京大学生数学建模与计算机应用竞赛 三等奖 · 2026 首都高校拔河锦标赛男子八人组冠军 / 四人组亚军 · 抗击台风“红霞”抢修复电荣誉表彰</p></div>
       </section>
 
       <footer className="contact" id="contact">
