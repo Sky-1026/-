@@ -157,6 +157,12 @@ function App() {
         ease: 'none',
         scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1 },
       })
+      ScrollTrigger.create({
+        trigger: '.hero',
+        start: '82% top',
+        onEnter: () => setNavFloating(true),
+        onLeaveBack: () => setNavFloating(false),
+      })
 
       document.querySelectorAll('.motion-section').forEach((section, index) => {
         const title = section.querySelector('.motion-title')
@@ -226,9 +232,9 @@ function App() {
 
   useEffect(() => {
     let pointerFrame = 0
-    let scrollFrame = 0
     let pointerX = 0
     let pointerY = 0
+    let heroVisible = true
     const move = e => {
       pointerX = e.clientX
       pointerY = e.clientY
@@ -238,29 +244,25 @@ function App() {
         pointerFrame = 0
       })
     }
-    const updateNav = () => {
-      if (scrollFrame) return
-      scrollFrame = requestAnimationFrame(() => {
-        setNavFloating(window.scrollY > window.innerHeight * .82)
-        scrollFrame = 0
-      })
-    }
     const syncVideoPlayback = () => {
       const video = videoRef.current
       if (!video || !allowHeroVideo) return
-      if (document.hidden) video.pause()
+      if (document.hidden || !heroVisible) video.pause()
       else video.play().catch(() => {})
     }
-    updateNav()
+    const heroObserver = new IntersectionObserver(([entry]) => {
+      heroVisible = entry.isIntersecting
+      syncVideoPlayback()
+    }, { threshold: .01 })
+    const hero = appRef.current?.querySelector('.hero')
+    if (hero) heroObserver.observe(hero)
     window.addEventListener('pointermove', move)
-    window.addEventListener('scroll', updateNav, { passive: true })
     document.addEventListener('visibilitychange', syncVideoPlayback)
     return () => {
       window.removeEventListener('pointermove', move)
-      window.removeEventListener('scroll', updateNav)
       document.removeEventListener('visibilitychange', syncVideoPlayback)
+      heroObserver.disconnect()
       cancelAnimationFrame(pointerFrame)
-      cancelAnimationFrame(scrollFrame)
     }
   }, [allowHeroVideo])
 
@@ -285,7 +287,7 @@ function App() {
 
       <section className="hero" id="home">
         <video ref={videoRef} className="hero-video" autoPlay={allowHeroVideo} muted loop playsInline preload={allowHeroVideo ? 'metadata' : 'none'} poster="/assets/video-poster.svg" aria-hidden="true">
-          {allowHeroVideo && <source src="/assets/hero-red-abstract.mp4" type="video/mp4" />}
+          {allowHeroVideo && <source src="/assets/hero-red-abstract-720p.mp4" type="video/mp4" />}
         </video>
         <div className="hero-overlay"/><div className="hero-grid"/><div className="noise"/>
         <div className="hero-content shell">
