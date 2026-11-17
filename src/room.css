@@ -7,12 +7,15 @@
   --paper: #d9d4cb;
   --ink: #17191d;
   --red: #f14120;
+  /* 画面上下要让出来的高度：内边距 ×2 + 索引那一行 + gap。
+     房间按这个余量把画面撑到窗口允许的最大。 */
+  --chrome: calc(clamp(10px, 1.1vw, 20px) * 2 + 46px);
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 18px;
-  padding: clamp(14px, 3.2vw, 46px);
+  gap: 12px;
+  padding: clamp(10px, 1.1vw, 20px);
   background:
     radial-gradient(120% 90% at 50% 0%, #cfcac1 0%, #b3aea6 62%, #9d988f 100%);
   color: var(--ink);
@@ -29,8 +32,10 @@
 /* ── 舞台 ── */
 .room-stage {
   position: relative;
-  width: 100%;
-  max-width: 1420px;
+  /* 撑到窗口允许的最大，但比例始终是背景图的 1792/1024：
+     宽度取「窗口宽」和「可用高 × 1.75」里小的那个，高度由 aspect-ratio 反推。
+     这样永远不会裁画面，热区百分比也就一直对得上纸上画的位置。 */
+  width: min(100%, max(320px, calc((100dvh - var(--chrome)) * 1.75)));
   margin: 0 auto;
   aspect-ratio: 1792 / 1024;
   border-radius: 22px;
@@ -334,7 +339,8 @@
   justify-content: center;
   gap: 4px 22px;
   width: 100%;
-  max-width: 1420px;
+  /* 和舞台同一个算法，索引这一行的宽度跟着画面对齐 */
+  max-width: min(100%, max(320px, calc((100dvh - var(--chrome)) * 1.75)));
   margin: 0 auto;
 }
 
@@ -365,6 +371,8 @@
 }
 
 @media (max-width: 620px) {
+  /* 竖屏是宽度受限，高度算法反而会把画面压小；下面还有卡片列表，直接按宽铺满 */
+  .room-stage { width: 100%; }
   .room-figure { left: 44%; width: 44%; }
   /* 手机上便利贴只有十几像素，点不准：关掉房间热点，改用下面的入口列表 */
   .room-hot { display: none; }
