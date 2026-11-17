@@ -1,0 +1,211 @@
+/* ══════════════════════════════════════════════════════════
+   模块页外壳。与房间层同一套配色（水泥灰 + 黑线 + 站点红），
+   区别只是房间是导航，这一层是每个模块自己的页面。
+   内容是空的也照常成立：位置、比例、列名都先立住。
+   ══════════════════════════════════════════════════════════ */
+
+.mod {
+  --paper: #d9d4cb;
+  --ink: #17191d;
+  --red: #f14120;
+  --line: rgba(23, 25, 29, .16);
+  --card: #f6f2ea;
+  min-height: 100dvh;
+  padding: 0 clamp(14px, 3.2vw, 46px) clamp(30px, 5vw, 70px);
+  background: radial-gradient(120% 90% at 50% 0%, #cfcac1 0%, #b3aea6 62%, #9d988f 100%);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(22px, 3vw, 38px);
+}
+
+/* ── 顶栏 ── */
+.mod-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 0 calc(-1 * clamp(14px, 3.2vw, 46px));
+  padding: 14px clamp(14px, 3.2vw, 46px);
+  background: rgba(211, 206, 198, .86);
+  backdrop-filter: blur(9px);
+  border-bottom: 1.5px solid var(--line);
+}
+
+.mod-bar > a,
+.mod-loc {
+  font: 400 11px / 1 'DM Mono', monospace;
+  letter-spacing: .12em;
+  text-decoration: none;
+  color: var(--ink);
+  padding: 8px 13px;
+  border: 1.5px solid rgba(23, 25, 29, .3);
+  border-radius: 999px;
+  background: transparent;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.mod-bar > a:hover,
+.mod-bar > a:focus-visible { background: var(--red); border-color: var(--red); color: #fff; outline: none; }
+
+.mod-loc { margin-left: auto; border-style: dashed; color: #6a655d; }
+
+.mod-tabs { display: flex; flex-wrap: wrap; gap: 4px 2px; }
+
+.mod-tabs a {
+  font: 400 12px / 1 'Noto Sans SC', sans-serif;
+  letter-spacing: .04em;
+  padding: 7px 11px;
+  border-radius: 999px;
+  text-decoration: none;
+  color: #4c4a45;
+  transition: background .2s ease, color .2s ease;
+}
+
+.mod-tabs a:hover, .mod-tabs a:focus-visible { color: var(--red); background: rgba(241, 65, 32, .1); outline: none; }
+.mod-tabs a[data-on="on"] { background: var(--ink); color: #f4efe6; }
+
+/* ── 页头 ── */
+.mod-head { max-width: 760px; }
+
+.mod-status {
+  display: inline-block;
+  margin: 0 0 14px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font: 400 10px / 1 'DM Mono', monospace;
+  letter-spacing: .14em;
+  background: rgba(38, 142, 92, .14);
+  color: #1f7a4f;
+}
+
+.mod-status[data-ready="off"] { background: rgba(23, 25, 29, .1); color: #5a564f; }
+
+.mod-kicker { display: block; margin-bottom: 8px; font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .18em; color: #6a655d; }
+.mod-head h1 { margin: 0 0 12px; font: 700 clamp(26px, 4vw, 46px) / 1.14 'Noto Sans SC', sans-serif; letter-spacing: -.015em; }
+.mod-lead { margin: 0 0 14px; font: 400 clamp(15px, 1.5vw, 18px) / 1.7 'Noto Sans SC', sans-serif; color: #3c3a36; max-width: 62ch; }
+.mod-text { margin: 0 0 11px; font: 400 14px / 1.85 'Noto Sans SC', sans-serif; color: #5a564f; max-width: 68ch; }
+
+/* ── 正文：槽位列表 ── */
+.mod-body {
+  display: grid;
+  gap: clamp(18px, 2.4vw, 28px);
+  width: 100%;
+  max-width: 1120px;
+}
+
+.mod-slot { display: grid; gap: 12px; }
+
+.mod-slot h4 {
+  margin: 0;
+  padding-bottom: 9px;
+  border-bottom: 1.5px solid var(--line);
+  font: 500 12px / 1 'DM Mono', 'Noto Sans SC', monospace;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #6a655d;
+}
+
+/* ── 表：列名先站住，行等数据 ── */
+.mod-table {
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  background: var(--card);
+  overflow: hidden;
+}
+
+.mod-tr {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+  gap: 12px;
+  padding: 13px 16px;
+  border-top: 1.5px solid rgba(23, 25, 29, .1);
+  font: 400 14px / 1.6 'Noto Sans SC', sans-serif;
+  color: var(--ink);
+}
+
+.mod-tr:first-child { border-top: 0; }
+.mod-tr.is-head { background: rgba(23, 25, 29, .06); }
+.mod-tr.is-head span { font: 400 10px / 1.4 'DM Mono', 'Noto Sans SC', monospace; letter-spacing: .14em; color: #6a655d; }
+.mod-empty { margin: 0; padding: 18px 16px; border-top: 1.5px dashed rgba(23, 25, 29, .22); font: 400 13px / 1.7 'Noto Sans SC', sans-serif; color: #6a655d; }
+
+/* ── 链接槽位 ── */
+.mod-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+
+.mod-links li {
+  display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+  padding: 13px 16px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+}
+
+.mod-links span { font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .14em; color: #837d74; min-width: 58px; }
+.mod-links a, .mod-links strong { font: 500 15px / 1.4 'DM Mono', 'Noto Sans SC', monospace; color: var(--ink); text-decoration: none; }
+.mod-links a { border-bottom: 1.5px solid rgba(241, 65, 32, .4); }
+.mod-links a:hover { color: var(--red); }
+
+/* ── 占位框：图 / 视频 / 图表的位置，只有虚线和说明 ── */
+.mod-frame {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 8px;
+  width: 100%;
+  max-height: 340px;
+  padding: 22px;
+  box-sizing: border-box;
+  border: 1.5px dashed rgba(23, 25, 29, .32);
+  border-radius: 16px;
+  background:
+    repeating-linear-gradient(135deg, rgba(23, 25, 29, .035) 0 9px, transparent 9px 18px);
+  text-align: center;
+}
+
+.mod-frame b { font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .18em; color: #8a847b; }
+.mod-frame span { font: 400 13px / 1.7 'Noto Sans SC', sans-serif; color: #5a564f; max-width: 46ch; }
+
+/* ── 页脚：模块之间能连着走 ── */
+.mod-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 18px;
+  border-top: 1.5px solid var(--line);
+  max-width: 1120px;
+  width: 100%;
+}
+
+.mod-foot a {
+  font: 400 12px / 1 'DM Mono', 'Noto Sans SC', monospace;
+  letter-spacing: .1em;
+  text-decoration: none;
+  color: #4c4a45;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(23, 25, 29, .26);
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.mod-foot a:hover, .mod-foot a:focus-visible { background: var(--red); border-color: var(--red); color: #fff; outline: none; }
+
+/* 影像栅格在大屏上多给一列 */
+@media (min-width: 900px) {
+  .mod .room-shots { grid-template-columns: repeat(5, 1fr); }
+}
+
+@media (max-width: 620px) {
+  .mod-tabs { display: none; }
+  .mod-loc { display: none; }
+  .mod-tr { grid-template-columns: 1fr; gap: 2px; }
+  .mod-tr.is-head { display: none; }
+  .mod-foot { justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mod-bar > a, .mod-tabs a, .mod-foot a, .mod-links a { transition: none; }
+}

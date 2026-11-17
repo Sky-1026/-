@@ -3,8 +3,13 @@ import { createRoot } from 'react-dom/client'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import ExperienceList from './Experience'
+import Room from './Room'
+import ModulePage from './ModulePage'
+import { pageIds, byId } from './modules'
 import './styles.css'
 import './experience.css'
+import './room.css'
+import './module.css'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -182,7 +187,7 @@ function ProjectVisual({ type }) {
   )
 }
 
-function App() {
+function ResumePage({ playOpening = true, anchor = null }) {
   const appRef = useRef(null)
   const cursorRef = useRef(null)
   const videoRef = useRef(null)
@@ -194,6 +199,14 @@ function App() {
     document.documentElement.classList.add('gsap-ready')
 
     if (reduceMotion) {
+      document.body.classList.remove('is-opening')
+      return () => document.documentElement.classList.remove('gsap-ready')
+    }
+
+    // 只有直接打开简历页才演幕布；从房间点进来时直接进内容
+    if (!playOpening) {
+      const curtain = document.querySelector('.opening-screen')
+      if (curtain) curtain.style.display = 'none'
       document.body.classList.remove('is-opening')
       return () => document.documentElement.classList.remove('gsap-ready')
     }
@@ -348,6 +361,15 @@ function App() {
     }
   }, [allowHeroVideo])
 
+  // 房间里点显示器 / 拔河绳是深链：等布局稳了再滚到那一段
+  useEffect(() => {
+    if (!anchor) return
+    const t = window.setTimeout(() => {
+      document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 320)
+    return () => window.clearTimeout(t)
+  }, [anchor])
+
   return (
     <main ref={appRef}>
       <div className="opening-screen" aria-hidden="true">
@@ -363,7 +385,7 @@ function App() {
       <header className={`nav shell${navFloating ? ' is-scrolled' : ''}`}>
         <a className="monogram" href="#home" aria-label="返回首页">LXJ<span>®</span></a>
         <nav aria-label="主导航">
-          <a href="#about">关于</a><a href="#work">项目</a><a href="#strengths">能力</a>
+          <a href="#/" className="nav-room">← 房间</a><a href="#about">关于</a><a href="#work">项目</a><a href="#strengths">能力</a>
         </nav>
         <Magnetic className="nav-contact-wrap">
           <a className="nav-contact" href="mailto:120241050109@ncepu.edu.cn">联系我 <Arrow/></a>
@@ -416,7 +438,7 @@ function App() {
         <div className="metrics" data-reveal>
           {metrics.map(m => <Metric key={m.label} {...m}/>)}
         </div>
-        <div className="experience" data-reveal>
+        <div className="experience" id="experience" data-reveal>
           <ExperienceList/>
         </div>
       </section>
@@ -446,7 +468,7 @@ function App() {
         <div className="strength-grid">
           {strengths.map(s => <article key={s.id} className="strength-card" data-reveal><span className="strength-id">{s.id}</span><div><h3>{s.title}</h3><p>{s.text}</p><small>{s.detail}</small></div><Arrow/></article>)}
         </div>
-        <div className="honors" data-reveal><span>RECENT RECOGNITION</span><p>全国大学生数学建模竞赛 北京二等奖 · 五一数学建模竞赛 全国二等奖 · 北京大学生数学建模与计算机应用竞赛 三等奖 · 2026 首都高校拔河锦标赛男子八人组冠军 / 四人组亚军 · 抗击台风“红霞”抢修复电荣誉表彰</p></div>
+        <div className="honors" data-reveal><span>RECENT RECOGNITION</span><p>全国大学生数学建模竞赛 北京二等奖 · 五一数学建模竞赛 全国二等奖 · 北京大学生数学建模与计算机应用竞赛 三等奖 · 首都高校拔河锦标赛 男子乙组四人组冠军 / 男子甲组八人组冠军 · 抗击台风“红霞”抢修复电荣誉表彰</p></div>
       </section>
 
       <footer className="contact" id="contact">
@@ -464,6 +486,53 @@ function App() {
       </footer>
     </main>
   )
+}
+
+/* ─────────── 入口：房间是首页，简历和其余模块各占一路由 ─────────── */
+const RESUME_ANCHORS = ['home', 'about', 'work', 'experience', 'strengths', 'contact']
+
+/* #/            房间（导航本体）
+   #/<模块 id>   模块页，id 见 src/modules.js
+   #/resume      简历长页，可带 ?to=<锚点> 直接滚到那一段
+   模块 id 优先于简历的页内锚点：#contact 是联系这一格，
+   简历里的联系段落要用 #/resume?to=contact。
+   不认识的 hash 返回 null：保持当前视图，不误跳 */
+function routeOf() {
+  const [path, query] = window.location.hash.replace(/^#\/?/, '').split('?')
+  const anchor = new URLSearchParams(query || '').get('to')
+  if (pageIds.includes(path)) return { view: 'module', id: path }
+  if (path === 'resume' || RESUME_ANCHORS.includes(path)) return { view: 'resume', anchor }
+  if (path === '' || path === 'room') return { view: 'room' }
+  return null
+}
+
+const FIRST_ROUTE = routeOf() || { view: 'room' }
+
+function App() {
+  const [route, setRoute] = useState(FIRST_ROUTE)
+
+  useEffect(() => {
+    const onHash = () => {
+      const next = routeOf()
+      if (!next) return
+      setRoute(next)
+      if (next.view !== 'resume') window.scrollTo(0, 0)
+    }
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+
+  useEffect(() => {
+    document.title = route.view === 'resume' ? '刘兴技 · 简历'
+      : route.view === 'module' ? `刘兴技 · ${byId[route.id].label}`
+      : '刘兴技 · 我的房间'
+  }, [route])
+
+  if (route.view === 'module') return <ModulePage id={route.id}/>
+  if (route.view === 'resume') {
+    return <ResumePage playOpening={FIRST_ROUTE.view === 'resume'} anchor={route.anchor}/>
+  }
+  return <Room/>
 }
 
 createRoot(document.getElementById('root')).render(<App />)

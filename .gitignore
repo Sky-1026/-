@@ -3,6 +3,9 @@ node_modules/
 dist/
 .vite/
 
+# 会话中间产物：参考图下载、透明切割校验拼图等，纯临时
+source-assets/ref/
+
 # 本地临时文件
 *.local
 .env

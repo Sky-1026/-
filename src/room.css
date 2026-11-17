@@ -1,0 +1,401 @@
+/* ══════════════════════════════════════════════════════════
+   房间导航层。与深色简历页并存，靠 #/ 与 #/resume 切换。
+   配色：水泥灰 + 黑线 + 站点红 #f14120
+   ══════════════════════════════════════════════════════════ */
+
+.room {
+  --paper: #d9d4cb;
+  --ink: #17191d;
+  --red: #f14120;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  padding: clamp(14px, 3.2vw, 46px);
+  background:
+    radial-gradient(120% 90% at 50% 0%, #cfcac1 0%, #b3aea6 62%, #9d988f 100%);
+  color: var(--ink);
+}
+
+.room-sr {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap; border: 0;
+}
+
+/* ── 舞台 ── */
+.room-stage {
+  position: relative;
+  width: 100%;
+  max-width: 1420px;
+  margin: 0 auto;
+  aspect-ratio: 1792 / 1024;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 2px solid rgba(23, 25, 29, .5);
+  box-shadow: 0 34px 90px rgba(20, 18, 14, .34), inset 0 0 0 6px rgba(255, 255, 255, .16);
+  isolation: isolate;
+}
+
+.room-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ── 九宫格姿势精灵 ── */
+.room-figure {
+  position: absolute;
+  left: 51.5%;
+  width: 27%;
+  bottom: 11.5%;
+  aspect-ratio: 379 / 480;
+  pointer-events: none;
+  filter: drop-shadow(0 16px 20px rgba(30, 26, 20, .22));
+}
+
+.room-figure img {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transform: translateZ(0);
+  transition: opacity .17s ease;
+  will-change: opacity;
+}
+
+.room-figure img[data-on="on"] { opacity: 1; }
+
+/* ── 热点 ── */
+.room-hot {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform .28s cubic-bezier(.16, 1, .3, 1), filter .28s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 便利贴：画在背景里是空白的，文字由 HTML 提供 */
+.room-note-text {
+  font: 700 clamp(11px, 1.42vw, 21px) / 1.15 'Noto Sans SC', sans-serif;
+  letter-spacing: .04em;
+  color: var(--ink);
+  opacity: .9;
+  transform: translateY(-6%);
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.room-hot.is-note::before,
+.room-hot.is-prop::before {
+  content: "";
+  position: absolute;
+  inset: -6%;
+  border-radius: 6px;
+  border: 2px dashed transparent;
+  transition: border-color .22s ease, background .22s ease, box-shadow .22s ease;
+}
+
+.room-hot.is-prop::before { border-radius: 14px; }
+
+.room-hot:hover::before,
+.room-hot:focus-visible::before {
+  border-color: rgba(241, 65, 32, .82);
+  background: rgba(241, 65, 32, .09);
+  box-shadow: 0 10px 26px rgba(241, 65, 32, .18);
+}
+
+.room-hot:hover,
+.room-hot:focus-visible {
+  transform: rotate(var(--tilt, 0deg)) translateY(-4%) scale(1.045);
+}
+
+.room-hot:hover .room-note-text,
+.room-hot:focus-visible .room-note-text { opacity: 1; transform: translateY(-9%); }
+
+.room-hot:focus-visible { outline: none; }
+
+/* 便利贴被"揭起一角" */
+.room-hot.is-note::after {
+  content: "";
+  position: absolute;
+  right: -2%; bottom: -2%;
+  width: 26%; height: 26%;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0) 50%, rgba(120, 112, 100, .5) 50%, rgba(232, 227, 218, .95) 56%);
+  opacity: 0;
+  transform: scale(.6);
+  transform-origin: 100% 100%;
+  transition: opacity .24s ease, transform .3s cubic-bezier(.16, 1, .3, 1);
+  pointer-events: none;
+}
+
+.room-hot.is-note:hover::after,
+.room-hot.is-note:focus-visible::after { opacity: 1; transform: scale(1); }
+
+/* ── 左下角读数条 ── */
+.room-readout {
+  position: absolute;
+  left: 2.4%;
+  bottom: 3.4%;
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  max-width: 62%;
+  padding: 9px 15px 10px;
+  border-radius: 999px;
+  background: rgba(18, 20, 24, .82);
+  color: #f3f1ec;
+  backdrop-filter: blur(6px);
+  transition: opacity .22s ease, transform .22s ease;
+}
+
+.room-readout strong { font: 700 clamp(12px, 1.15vw, 16px) / 1 'Noto Sans SC', sans-serif; }
+.room-readout span { font: 400 clamp(9px, .82vw, 12px) / 1.3 'DM Mono', monospace; letter-spacing: .08em; color: #a9a49c; }
+
+/* ── 右下角常驻联系，不是房间家具，不驱动姿势 ── */
+.room-hi {
+  position: absolute;
+  right: 2.4%;
+  bottom: 3.4%;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 8px 14px 9px;
+  border-radius: 999px;
+  background: rgba(18, 20, 24, .74);
+  backdrop-filter: blur(6px);
+}
+
+.room-hi span { font: 400 9px / 1 'DM Mono', monospace; letter-spacing: .16em; color: #8f8a82; }
+.room-hi a { font: 400 clamp(9px, .8vw, 11.5px) / 1 'DM Mono', 'Noto Sans SC', monospace; letter-spacing: .04em; color: #f3f1ec; text-decoration: none; border-bottom: 1px solid rgba(241, 65, 32, .55); }
+.room-hi a:hover, .room-hi a:focus-visible { color: #ffb3a0; outline: none; }
+
+/* ── 窄屏兜底列表 ── */
+.room-list { display: none; }
+
+/* ── 面板层 ── */
+.room-layer { position: fixed; inset: 0; z-index: 140; }
+
+.room-scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  cursor: pointer;
+  background: rgba(24, 22, 19, .58);
+  backdrop-filter: blur(3px);
+  animation: room-fade .3s ease both;
+}
+
+.room-panel {
+  position: absolute;
+  left: 50%; bottom: 0;
+  width: min(1080px, 100%);
+  max-height: 86dvh;
+  transform: translate(-50%, 100%);
+  animation: room-up .62s cubic-bezier(.16, 1, .3, 1) forwards;
+  background: #efeae1;
+  color: var(--ink);
+  border-radius: 26px 26px 0 0;
+  border: 2px solid rgba(23, 25, 29, .42);
+  border-bottom: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -22px 70px rgba(20, 18, 14, .34);
+}
+
+@keyframes room-up { to { transform: translate(-50%, 0); } }
+@keyframes room-fade { from { opacity: 0; } to { opacity: 1; } }
+
+.room-panel-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px clamp(18px, 3vw, 34px);
+  border-bottom: 2px solid rgba(23, 25, 29, .16);
+  background: #e6e0d6;
+}
+
+.room-panel-bar span { font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .16em; color: #6a655d; }
+
+.room-panel-bar button {
+  font: 400 11px / 1 'DM Mono', monospace;
+  letter-spacing: .1em;
+  padding: 8px 13px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(23, 25, 29, .3);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.room-panel-bar button:hover,
+.room-panel-bar button:focus-visible { background: var(--red); border-color: var(--red); color: #fff; outline: none; }
+.room-panel-bar button i { font-style: normal; opacity: .6; margin-left: 6px; }
+
+.room-panel-body { overflow: auto; padding: clamp(20px, 3.4vw, 40px); }
+
+.room-status {
+  display: inline-block;
+  margin: 0 0 14px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font: 400 10px / 1 'DM Mono', monospace;
+  letter-spacing: .14em;
+  background: rgba(38, 142, 92, .14);
+  color: #1f7a4f;
+}
+
+.room-status[data-soon="on"] { background: rgba(241, 65, 32, .13); color: #b8300f; }
+
+.room-panel-body h3 { margin: 0 0 12px; font: 700 clamp(24px, 3.4vw, 40px) / 1.16 'Noto Sans SC', sans-serif; letter-spacing: -.01em; }
+.room-lead { margin: 0 0 16px; font: 400 clamp(15px, 1.5vw, 18px) / 1.7 'Noto Sans SC', sans-serif; color: #3c3a36; }
+.room-text { margin: 0 0 12px; font: 400 14px / 1.85 'Noto Sans SC', sans-serif; color: #5a564f; max-width: 68ch; }
+
+.room-links { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 10px; }
+
+.room-links li {
+  display: flex; align-items: baseline; gap: 14px;
+  padding: 13px 16px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(23, 25, 29, .16);
+  background: #f6f2ea;
+}
+
+.room-links span { font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .14em; color: #837d74; min-width: 58px; }
+.room-links a, .room-links strong { font: 500 15px / 1.4 'DM Mono', 'Noto Sans SC', monospace; color: var(--ink); text-decoration: none; }
+.room-links a { border-bottom: 1.5px solid rgba(241, 65, 32, .4); }
+.room-links a:hover { color: var(--red); }
+
+.room-shots { margin-top: 26px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+.room-shots button {
+  padding: 0; border: 1.5px solid rgba(23, 25, 29, .18); border-radius: 12px;
+  background: #fff; cursor: pointer; overflow: hidden; text-align: left;
+  transition: transform .26s cubic-bezier(.16, 1, .3, 1), border-color .2s ease, box-shadow .2s ease;
+}
+
+.room-shots button:hover, .room-shots button:focus-visible {
+  transform: translateY(-3px); border-color: var(--red);
+  box-shadow: 0 12px 26px rgba(23, 25, 29, .16); outline: none;
+}
+
+.room-shots img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.room-shots span { display: block; padding: 8px 10px 10px; font: 400 11px / 1.4 'Noto Sans SC', sans-serif; color: #5a564f; }
+
+.room-zoom { margin: 0 0 20px; }
+.room-zoom img { width: 100%; max-height: 58dvh; object-fit: contain; border-radius: 14px; background: #fff; border: 1.5px solid rgba(23, 25, 29, .18); }
+.room-zoom figcaption { display: flex; align-items: center; gap: 14px; margin-top: 10px; font: 400 11px / 1.4 'DM Mono', 'Noto Sans SC', monospace; letter-spacing: .08em; color: #6a655d; }
+.room-zoom button { margin-left: auto; cursor: pointer; border: 1.5px solid rgba(23, 25, 29, .3); background: transparent; border-radius: 999px; padding: 6px 12px; font: 400 11px / 1 'DM Mono', monospace; }
+
+.room-todo { margin: 24px 0 0; padding-left: 20px; }
+.room-todo li { margin-bottom: 7px; font: 400 13px / 1.7 'Noto Sans SC', sans-serif; color: #6a655d; }
+.room-todo li::marker { color: var(--red); }
+
+.room-panel-foot {
+  display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+  margin: 28px 0 0;
+  padding-top: 16px;
+  border-top: 1.5px dashed rgba(23, 25, 29, .22);
+}
+
+.room-panel-foot a {
+  font: 400 12px / 1 'DM Mono', 'Noto Sans SC', monospace;
+  letter-spacing: .1em;
+  color: var(--ink);
+  text-decoration: none;
+  padding: 9px 15px;
+  border: 1.5px solid rgba(23, 25, 29, .3);
+  border-radius: 999px;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.room-panel-foot a:hover, .room-panel-foot a:focus-visible { background: var(--red); border-color: var(--red); color: #fff; outline: none; }
+.room-panel-foot span { font: 400 11px / 1.6 'Noto Sans SC', sans-serif; color: #8a847b; }
+
+/* ── 房间下方的文字索引：墙上只有九个姿势，其余格子从这里进 ── */
+.room-index {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 22px;
+  width: 100%;
+  max-width: 1420px;
+  margin: 0 auto;
+}
+
+.room-index a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+  font: 400 13px / 1 'Noto Sans SC', sans-serif;
+  color: #2b2d31;
+  text-decoration: none;
+  padding: 6px 2px;
+  border-bottom: 1.5px solid transparent;
+  transition: color .2s ease, border-color .2s ease;
+}
+
+.room-index a:hover, .room-index a:focus-visible { color: var(--red); border-bottom-color: var(--red); outline: none; }
+.room-index small { font: 400 9px / 1 'DM Mono', monospace; letter-spacing: .14em; color: #7d776f; }
+.room-index a:hover small { color: var(--red); }
+
+/* ── 响应式 ── */
+/* 注意：舞台比例必须始终等于背景图的 1792/1024。
+   一旦改成别的比例，object-fit: cover 会把画面左右裁掉，
+   热区的百分比就对不上纸上画的位置了。 */
+@media (max-width: 900px) {
+  .room-figure { left: 48%; width: 33.8%; bottom: 10.4%; }
+  .room-readout { max-width: 74%; }
+  .room-shots { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 620px) {
+  .room-figure { left: 44%; width: 44%; }
+  /* 手机上便利贴只有十几像素，点不准：关掉房间热点，改用下面的入口列表 */
+  .room-hot { display: none; }
+  .room-note-text { opacity: 0; }
+  .room-hot.is-note::before { border-color: rgba(241, 65, 32, .42); background: rgba(241, 65, 32, .07); }
+  .room-readout { display: none; }
+  /* 索引和入口列表功能重叠，窄屏只留卡片列表 */
+  .room-index { display: none; }
+  .room-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+    gap: 10px;
+    width: 100%; max-width: 620px; margin: 0 auto;
+  }
+  .room-list button {
+    text-align: left; cursor: pointer;
+    padding: 12px 14px; border-radius: 12px;
+    border: 1.5px solid rgba(23, 25, 29, .3);
+    background: rgba(255, 252, 246, .8);
+    color: var(--ink);
+    display: grid; gap: 3px;
+  }
+  .room-list small { font: 400 9px / 1 'DM Mono', monospace; letter-spacing: .14em; color: #8a847b; }
+  .room-list strong { font: 700 15px / 1.2 'Noto Sans SC', sans-serif; }
+  .room-list span { font: 400 11px / 1.4 'Noto Sans SC', sans-serif; color: #6a655d; }
+  .room-shots { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-figure img { transition: none; }
+  .room-hot, .room-hot::before, .room-hot::after, .room-note-text { transition: none; }
+  .room-scrim, .room-panel { animation: none; }
+  .room-panel { transform: translate(-50%, 0); }
+}
