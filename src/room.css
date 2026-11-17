@@ -83,6 +83,27 @@
 
 .room-figure img[data-on="on"] { opacity: 1; }
 
+/* ── 墙上的海报：深色木框 + 白卡纸边，压在便利贴那一片墙上 ── */
+.room-poster {
+  position: absolute;
+  box-sizing: border-box;
+  padding: 1.4% 1.2%;
+  background: #f2ede5;
+  border: 3px solid rgba(38, 32, 26, .78);
+  border-radius: 4px;
+  box-shadow: 0 16px 30px rgba(30, 26, 20, .28), inset 0 0 0 1px rgba(255, 255, 255, .55);
+  transform: rotate(var(--tilt, 0deg));
+  pointer-events: none;
+}
+
+.room-poster img {
+  display: block;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: 1px;
+  filter: saturate(.92) contrast(1.02);
+}
+
 /* ── 热点 ── */
 .room-hot {
   position: absolute;
@@ -153,7 +174,7 @@
 .room-hot.is-note:hover::after,
 .room-hot.is-note:focus-visible::after { opacity: 1; transform: scale(1); }
 
-/* ── 左下角读数条 ── */
+/* ── 左下角读数条：只在 hover 到某件物品时出现，平时画面里不留 UI ── */
 .room-readout {
   position: absolute;
   left: 2.4%;
@@ -167,29 +188,16 @@
   background: rgba(18, 20, 24, .82);
   color: #f3f1ec;
   backdrop-filter: blur(6px);
+  opacity: 0;
+  transform: translateY(8px);
   transition: opacity .22s ease, transform .22s ease;
+  pointer-events: none;
 }
+
+.room-readout[data-on="on"] { opacity: 1; transform: none; }
 
 .room-readout strong { font: 700 clamp(12px, 1.15vw, 16px) / 1 'Noto Sans SC', sans-serif; }
 .room-readout span { font: 400 clamp(9px, .82vw, 12px) / 1.3 'DM Mono', monospace; letter-spacing: .08em; color: #a9a49c; }
-
-/* ── 右下角常驻联系，不是房间家具，不驱动姿势 ── */
-.room-hi {
-  position: absolute;
-  right: 2.4%;
-  bottom: 3.4%;
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-  padding: 8px 14px 9px;
-  border-radius: 999px;
-  background: rgba(18, 20, 24, .74);
-  backdrop-filter: blur(6px);
-}
-
-.room-hi span { font: 400 9px / 1 'DM Mono', monospace; letter-spacing: .16em; color: #8f8a82; }
-.room-hi a { font: 400 clamp(9px, .8vw, 11.5px) / 1 'DM Mono', 'Noto Sans SC', monospace; letter-spacing: .04em; color: #f3f1ec; text-decoration: none; border-bottom: 1px solid rgba(241, 65, 32, .55); }
-.room-hi a:hover, .room-hi a:focus-visible { color: #ffb3a0; outline: none; }
 
 /* ── 窄屏兜底列表 ── */
 .room-list { display: none; }

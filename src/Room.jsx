@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { nodes, hotspots, byId, isReady, slotsOf } from './modules'
+import { nodes, hotspots, byId, isReady, slotsOf, posters } from './modules'
 import Shots from './Shots'
 
 const TOTAL_POSES = 10
@@ -120,6 +120,14 @@ export default function Room() {
       <div className="room-stage">
         <img className="room-bg" src="/assets/room/bg.jpg" alt="" decoding="async" fetchPriority="high"/>
 
+        {/* 海报在人物之前渲染：他站在墙前，相框被他挡住是应该的 */}
+        {posters.map(p => (
+          <div key={p.id} className="room-poster" aria-hidden="true"
+               style={{ left: `${p.x}%`, top: `${p.y}%`, width: `${p.w}%`, height: `${p.h}%`, '--tilt': `${p.tilt}deg` }}>
+            <img src={p.src} alt="" loading="eager" decoding="async"/>
+          </div>
+        ))}
+
         {/* 十张姿势精灵叠在一起：hover 到哪件物品就摆那件对应的姿势，离开回到待机 */}
         <div className="room-figure" aria-hidden="true" data-pose={pose}>
           {POSES.map((src, i) => (
@@ -144,17 +152,15 @@ export default function Room() {
           </button>
         ))}
 
+        {/* 读数条只在 hover 时出现：不 hover 时画面上一个 UI 元素都不留 */}
         <p className="room-readout" data-on={active ? 'on' : 'off'} aria-hidden="true">
-          <strong>{active ? active.label : '刘兴技'}</strong>
-          <span>{active ? `${active.en} · ${active.hint}` : '手别停，指到哪他摆哪个姿势'}</span>
+          {active && (
+            <>
+              <strong>{active.label}</strong>
+              <span>{active.en} · {active.hint}</span>
+            </>
+          )}
         </p>
-
-        {/* 联系不是房间里的家具，就放在角上当常驻信息，不占姿势 */}
-        <div className="room-hi">
-          <span>BEIJING · CN</span>
-          <a href="mailto:120241050109@ncepu.edu.cn">120241050109@ncepu.edu.cn</a>
-          <a href="#/resume">完整简历 ↗</a>
-        </div>
       </div>
 
       {/* 窄屏兜底：房间还是那张图，但入口再给一份可点列表 */}

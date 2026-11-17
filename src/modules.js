@@ -5,19 +5,26 @@ import { projects } from './workData'
    平台唯一的结构定义。
    一个 node = 一个模块。加模块只改这里，Room / 面板 / 页面都会跟着长。
 
-   spot      在房间里的位置（背景图 1792×1024 的百分比）+ 对应姿势
+   spot      在房间里的位置（背景图 1792×1024 的百分比，左上角为准）+ 对应姿势
              pose: 1—9 是奥赛姿势，一件物品一个，不能重复；
              10 是放松站立的待机姿势，没有 hover 时回到它。
              ⇒ 带 spot 的物品必须 ≤ 9，否则姿势会撞车。
+             kind: 'note' 是便利贴，文字由 HTML 叠上去（画里是空白纸）；
+                   'prop' 是画里的实物，靠 hover 的红虚线框和左下角读数条提示。
+             坐标不许目测：用 /c/Python314/python 量色块，再把候选区裁出来
+             肉眼确认边界（source-assets/ref/room/）。改完必须查重叠——
+             两个热区叠住时，点击会落到 DOM 里靠后的那个，前面那个就点不到。
    go        直接跳去别处（简历长页 / 深链），不打开面板
    slots     有它就有独立页面 #/<id>，见 ModulePage.jsx
    kicker/title/lead/body  面板与页面共用的文案
 
-   slot 类型只有六种，内容以后往 items 里填，不再动结构：
+   slot 类型只有八种，内容以后往 items 里填，不再动结构：
      para   { text }
+     paras  { title, from:'<经历 id>' }                   // 正文取自经历数据
      list   { title, columns:[], items:[{ cells:[], note? }], empty }
-     stats  { title, columns:[], items:[[k, v]], empty }
-     shots  { title, gallery:'gallery'|'honors' }        // 从经历数据里取真实图
+     stats  { title, columns:[], items:[[k, v]], empty }  // 也可 from:'<经历 id>'
+     shots  { title, gallery:'gallery'|'honors' }          // 全部经历的实拍
+     cards  { title, items:[项目] }                        // 取自 workData
      links  { title, items:[{ kind, label, href }] }
      frame  { title, kind, ratio, empty }                // 图/视频/图表的位置，先空着
    ──────────────────────────────────────────────────────────── */
@@ -42,7 +49,7 @@ export const nodes = [
       '数据结构就一行一条：日期、动作、重量、次数、组数。你继续用 Hevy 或 Keep 记，导出成 CSV 放进 src/data/training.csv，构建时算出所有图，不需要后端。',
       '体重、体脂这类身体数据默认不上线——训练量可以公开，身体不行。',
     ],
-    spot: { kind: 'note', x: 39.1, y: 12.9, w: 5.6, h: 9.2, tilt: 1.5, pose: 5 },
+    spot: { kind: 'prop', x: 12.5, y: 61.5, w: 32.5, h: 13.5, pose: 5 },
     slots: [
       { type: 'para', text: '先只搭架子：下面每一块的位置、比例、列名都定好了，等你把真实记录给我，填进去就出图，不再改版式。' },
       { type: 'stats', title: '三大项 PR', columns: ['动作', '重量', '日期'], items: [],
@@ -62,7 +69,7 @@ export const nodes = [
       '格式是带 YAML 头的 Markdown，放在 src/data/notes/ 下，构建时读目录生成索引。不写长文，所以不会变成负担。',
       '候选选题：ETL 里遇到过的脏数据模式、STAR 与索引失效、数模里被推翻的假设、拔河发力节奏。',
     ],
-    spot: { kind: 'note', x: 46.5, y: 23.0, w: 5.6, h: 9.2, tilt: -1, pose: 8 },
+    spot: { kind: 'prop', x: 0.8, y: 44.5, w: 9.4, h: 18.5, pose: 8 },
     slots: [
       { type: 'para', text: '列表页与详情页的结构在这里；每条只写日期、标题、标签、正文四样，写不出来的就先空着。' },
       { type: 'list', title: '条目', columns: ['日期', '标题', '标签'], items: [],
@@ -75,7 +82,7 @@ export const nodes = [
     kicker: 'NOW / 此刻', title: '这个学期我在做的事',
     lead: '不是时间线，是“此刻”：在练什么、在读什么、在纠结什么。每季度改一次。',
     body: ['参考 Derek Sivers 的 now page 思路——它替代了“朋友圈”，但不用天天发。'],
-    spot: { kind: 'note', x: 42.3, y: 33.9, w: 5.6, h: 9.2, tilt: -1.5, pose: 1 },
+    spot: { kind: 'prop', x: 10.3, y: 42.0, w: 5.0, h: 18.7, pose: 1 },
     slots: [
       { type: 'list', title: '现在', columns: ['方面', '状态'], items: [],
         empty: '四个位置留好了：在练 / 在学 / 在读 / 在想。每季度只改这一页。' },
@@ -117,7 +124,7 @@ export const nodes = [
       '实习、抢修、志愿服务现场的原始照片都在这里；证书另放在“荣誉与证书”那一格，免得混在一起看不清。',
       '点任意一张看大图，左右方向键翻页。',
     ],
-    spot: { kind: 'note', x: 53.0, y: 18.3, w: 5.6, h: 9.2, tilt: 2, pose: 7 },
+    spot: { kind: 'prop', x: 79.8, y: 67.8, w: 12.5, h: 17.6, pose: 7 },
     slots: [
       { type: 'shots', title: '照片', gallery: 'gallery' },
       { type: 'frame', title: '现场视频', kind: 'VIDEO · 16:9', ratio: '16 / 9',
@@ -185,6 +192,14 @@ export const hotspots = nodes
 
 /* 有独立页面的模块，页面之间的上一格/下一格按这个顺序走 */
 export const pages = nodes.filter(n => n.slots)
+
+/* 墙上的海报：纯装饰，不可点。
+   九个姿势已经排满，多一件可点物品就得多个姿势，所以海报先只当画面。
+   坐标同样是背景图 1792×1024 的百分比，加一张只加一行。 */
+export const posters = [
+  { id: 'self-carving', src: '/assets/room/posters/self-carving.webp',
+    x: 40.0, y: 10.5, w: 18.5, h: 41.5, tilt: -0.7 },
+]
 
 export const byId = Object.fromEntries(nodes.map(n => [n.id, n]))
 export const pageIds = pages.map(n => n.id)
