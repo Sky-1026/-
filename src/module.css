@@ -211,6 +211,17 @@
 .confess-act button:hover, .confess-act button:focus-visible { background: var(--red); border-color: var(--red); color: #fff; outline: none; }
 .confess-act button:active { transform: scale(.96); }
 .confess-act button svg { width: 15px; height: 15px; fill: currentColor; }
+.confess-open {
+  font: 400 12px / 1 'DM Mono', 'Noto Sans SC', monospace;
+  letter-spacing: .08em;
+  text-decoration: none;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(23, 25, 29, .26);
+  color: var(--ink);
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.confess-open:hover, .confess-open:focus-visible { background: var(--red); border-color: var(--red); color: #fff; outline: none; }
 .confess-act span { font: 400 11px / 1.4 'DM Mono', 'Noto Sans SC', monospace; letter-spacing: .08em; color: #4a4741; }
 .confess-note { margin: 12px 0 0; font: 400 12px / 1.7 'Noto Sans SC', sans-serif; color: #4a4741; }
 

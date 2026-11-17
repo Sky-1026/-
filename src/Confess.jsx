@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 const KEY = 'lxj.heart.confess'
 const reduce = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -62,20 +63,56 @@ export function HeartBurst({ seed }) {
   )
 }
 
-/* 表白块：面板和模块页共用同一份文案与同一个计数。 */
-export function ConfessBox({ data, onBurst }) {
+/* 全屏挂载那页表白爱心：不重写它的粒子时间线，直接用同源 iframe 装进来。
+   iframe 里那份页面自己绑了 ESC 和左右键，所以这里只在"它自己的照片弹窗没开着"时
+   才把 ESC 接过来关外层，否则会让两层同时关掉。 */
+export function ConfessOverlay({ onClose }) {
+  const fr = useRef(null)
+
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const onKey = e => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', onKey) }
+  }, [onClose])
+
+  const wire = () => {
+    const w = fr.current && fr.current.contentWindow
+    if (!w) return
+    w.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return
+      if (w.document.querySelector('.lb:not([hidden])')) return   // 先让里面关照片
+      onClose()
+    }, true)
+  }
+
+  return createPortal(
+    <div className="confess-layer" role="dialog" aria-modal="true" aria-label="给你的爱心">
+      <iframe ref={fr} className="confess-frame" src="/confess/index.html" title="由祝福文字组成的跳动爱心" onLoad={wire}/>
+      <div className="confess-top">
+        <button type="button" onClick={onClose}>← 回房间 <i>ESC</i></button>
+        <a href="#/likes" onClick={onClose}>喜欢清单 <i>↗</i></a>
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
+/* 表白块：挂在 #/likes。计数只在本机，链接直接开那一整页爱心。 */
+export function ConfessBox({ data }) {
   const [n, bump] = useCount()
-  const tap = () => { bump(); onBurst?.() }
 
   return (
     <section className="confess" data-pop={n ? 'on' : 'off'}>
       <h4>{data.kicker}</h4>
       <p className="confess-line">{data.text}</p>
       <div className="confess-act">
-        <button type="button" onClick={tap}>
+        <button type="button" onClick={bump}>
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d={HEART}/></svg>
           按一颗心
         </button>
+        {data.url && <a className="confess-open" href={data.url} target="_blank" rel="noopener">打开完整爱心 ↗</a>}
         <span aria-live="polite">本机已按 {n} 颗</span>
       </div>
       <p className="confess-note">{data.note}</p>

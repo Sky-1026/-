@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { nodes, hotspots, byId, isReady, slotsOf, posters } from './modules'
 import Shots from './Shots'
-import { ConfessBox, HeartBurst } from './Confess'
+import { ConfessOverlay, HeartBurst } from './Confess'
 
 const TOTAL_POSES = 11
 const IDLE = 10                                   // 放松站立：没有 hover 时回到它；11 是「喜欢」的双手比心
@@ -13,7 +13,7 @@ const POSES = Array.from(
 const poseOf = id => hotspots.find(h => h.id === id)?.pose ?? null
 
 /* ─────────── 房间面板：一眼预览，剩下的在模块页里 ─────────── */
-function RoomSheet({ id, onClose, onBurst }) {
+function RoomSheet({ id, onClose }) {
   const node = byId[id]
 
   useEffect(() => {
@@ -55,8 +55,6 @@ function RoomSheet({ id, onClose, onBurst }) {
           <p className="room-lead">{node.lead}</p>
           {node.body?.map((t, i) => <p className="room-text" key={i}>{t}</p>)}
 
-          {node.confess && <ConfessBox data={node.confess} onBurst={onBurst}/>}
-
           {linkSlot && (
             <ul className="room-links">
               {linkSlot.items.map(l => (
@@ -93,6 +91,7 @@ export default function Room() {
   const [held, setHeld] = useState(null)          // 打开面板的那件物品，面板期间保持姿势
   const [open, setOpen] = useState(null)
   const [burst, setBurst] = useState(0)           // 每 +1 甩一片爱心，只有挂 confess 的物品会推它
+  const [overlay, setOverlay] = useState(false)   // 那颗心直接全屏打开表白页，不走普通面板
 
   const activeId = open ? held : hover
   const pose = poseOf(activeId) ?? IDLE
@@ -109,9 +108,15 @@ export default function Room() {
   const enter = id => setHover(() => id)
   const leave = id => setHover(v => (v === id ? null : v))
 
+  const openConfess = () => {
+    setBurst(b => b + 1)
+    // 先让那一片爱心飞半秒再铺满全屏：心从墙上炸开 → 整个世界变成这颗心
+    setTimeout(() => setOverlay(true), 480)
+  }
+
   const pick = h => {
+    if (h.confess) { openConfess(); return }
     setHeld(h.id)
-    if (h.confess) setBurst(b => b + 1)
     if (h.go) { window.location.hash = h.go; setHeld(null) }
     else setOpen(h.id)
   }
@@ -175,7 +180,7 @@ export default function Room() {
       <nav className="room-list" aria-label="模块入口">
         {entries.map(n => (
           <button key={n.id} onClick={() => {
-            if (n.confess) setBurst(b => b + 1)
+            if (n.confess) { openConfess(); return }
             if (n.go) window.location.hash = n.go; else setOpen(n.id)
           }}>
             <small>{n.en}</small><strong>{n.label}</strong><span>{n.hint}</span>
@@ -183,7 +188,9 @@ export default function Room() {
         ))}
       </nav>
 
-      {open && <RoomSheet id={open} onClose={close} onBurst={() => setBurst(b => b + 1)}/>}
+      {overlay && <ConfessOverlay onClose={() => setOverlay(false)}/>}
+
+      {open && <RoomSheet id={open} onClose={close}/>}
     </div>
   )
 }

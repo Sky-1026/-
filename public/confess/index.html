@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>给你的爱心</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ff4d6d' d='M12 21s-7.5-4.9-10-9.3C.4 8.6 2.3 5 5.7 5c2 0 3.4 1.1 4.3 2.4h4c.9-1.3 2.3-2.4 4.3-2.4 3.4 0 5.3 3.6 3.7 6.7C19.5 16.1 12 21 12 21z'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#07060a;
+    --pink:#ff5c8a;
+    --rose:#ff2d55;
+    --soft:#ffb3c8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;overflow:hidden;background:var(--bg);}
+  body{
+    font-family:"Microsoft YaHei","PingFang SC","Source Han Sans SC",system-ui,sans-serif;
+    color:var(--soft);
+  }
+  #stage{position:fixed;inset:0;display:block;}
+  /* 顶部一句话 */
+  .caption{
+    position:fixed;left:0;right:0;top:6vh;text-align:center;
+    pointer-events:none;user-select:none;
+    letter-spacing:.35em;font-size:clamp(15px,2.4vw,22px);
+    color:#ffd9e3;text-shadow:0 0 18px rgba(255,77,109,.55);
+    opacity:0;animation:fadeIn 1.6s ease .4s forwards;
+  }
+  /* 底部落款 */
+  .signature{
+    position:fixed;left:0;right:0;bottom:5vh;text-align:center;
+    pointer-events:none;user-select:none;
+    font-size:clamp(13px,1.8vw,17px);letter-spacing:.25em;color:#e89aae;
+    opacity:0;animation:fadeIn 1.6s ease 1.6s forwards;
+  }
+  @keyframes fadeIn{to{opacity:1;}}
+  /* 点击重新聚拢 */
+  .replay{
+    position:fixed;right:18px;bottom:18px;z-index:10;
+    background:rgba(255,77,109,.12);border:1px solid rgba(255,92,138,.45);
+    color:#ffc2d1;border-radius:999px;padding:9px 16px;font-size:13px;
+    letter-spacing:.1em;cursor:pointer;backdrop-filter:blur(6px);
+    transition:background .2s,transform .2s;
+  }
+  .replay:hover{background:rgba(255,77,109,.28);transform:translateY(-1px);}
+  .replay:focus-visible{outline:2px solid var(--pink);outline-offset:2px;}
+  /* 音乐开关 */
+  .music-btn{
+    position:fixed;right:18px;top:18px;z-index:10;
+    width:40px;height:40px;border-radius:50%;padding:0;
+    background:rgba(255,77,109,.12);border:1px solid rgba(255,92,138,.45);
+    color:#ffc2d1;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    backdrop-filter:blur(6px);transition:background .2s,transform .2s;
+  }
+  .music-btn:hover{background:rgba(255,77,109,.28);transform:translateY(-1px);}
+  .music-btn:focus-visible{outline:2px solid var(--pink);outline-offset:2px;}
+  .music-btn[disabled]{opacity:.4;cursor:default;}
+  .music-btn svg{width:20px;height:20px;}
+  .music-btn .ic-on{display:none;}
+  .music-btn.playing .ic-on{display:block;}
+  .music-btn.playing .ic-off{display:none;}
+  /* 照片弹窗 */
+  .lb{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;}
+  .lb[hidden]{display:none;}
+  .lb-backdrop{position:absolute;inset:0;background:rgba(5,4,8,.88);backdrop-filter:blur(4px);}
+  .lb-figure{position:relative;max-width:90vw;max-height:86vh;display:flex;flex-direction:column;align-items:center;}
+  #lb-img{max-width:86vw;max-height:74vh;border-radius:14px;border:1px solid rgba(255,157,184,.5);box-shadow:0 0 40px rgba(255,45,85,.35);object-fit:contain;}
+  .lb-close{position:absolute;top:-16px;right:-16px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,157,184,.5);background:rgba(20,10,14,.9);color:#ffd9e3;font-size:18px;cursor:pointer;line-height:1;}
+  .lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;border:1px solid rgba(255,157,184,.4);background:rgba(20,10,14,.7);color:#ffc2d1;font-size:22px;cursor:pointer;line-height:1;}
+  .lb-prev{left:-54px;}
+  .lb-next{right:-54px;}
+  .lb-close:hover,.lb-nav:hover{background:rgba(255,77,109,.3);}
+  .lb-figure figcaption{margin-top:12px;color:#ffd9e3;letter-spacing:.2em;font-size:14px;}
+  #lb-count{margin-left:14px;color:#e89aae;font-size:12px;letter-spacing:.1em;}
+  @media (max-width:640px){.lb-prev{left:6px;}.lb-next{right:6px;}}
+  @media (prefers-reduced-motion: reduce){
+    .caption,.signature{animation:none;opacity:1;}
+  }
+</style>
+</head>
+<body>
+<canvas id="stage" aria-label="由祝福文字组成的跳动爱心动画"></canvas>
+<div class="caption">我把想说的话，都藏进这颗心里</div>
+<div class="signature">—— 想你的每一天</div>
+<button class="replay" id="replay" type="button">再看一次</button>
+<audio id="bgm" loop preload="auto" src="bgm.mp3"></audio>
+<button class="music-btn" id="musicBtn" type="button" aria-label="播放背景音乐" aria-pressed="false">
+  <svg class="ic-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+  <svg class="ic-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/><line x1="3" y1="3" x2="21" y2="21"/></svg>
+</button>
+
+<div class="lb" id="lightbox" hidden>
+  <div class="lb-backdrop" id="lb-backdrop"></div>
+  <figure class="lb-figure">
+    <button class="lb-close" id="lb-close" type="button" aria-label="关闭">×</button>
+    <button class="lb-nav lb-prev" id="lb-prev" type="button" aria-label="上一张">‹</button>
+    <img id="lb-img" alt="回忆照片">
+    <button class="lb-nav lb-next" id="lb-next" type="button" aria-label="下一张">›</button>
+    <figcaption><span id="lb-caption"></span><span id="lb-count"></span></figcaption>
+  </figure>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ 可自定义：表白文案 ============ */
+  var EDGE_MESSAGES = [
+    "想你","爱你","念你","宠你","护你","陪你","等你","选你",
+    "懂你","欢喜","偏爱","温柔","浪漫","心动","唯一","答案",
+    "早安","晚安","四季","三餐","星空","月亮","风景","想见"
+  ];
+  var MESSAGES = [
+    "我爱你","想你了","好好吃饭","岁岁年年","平安喜乐","万事胜意",
+    "要开心","别熬夜","多喝水","你超棒","心想事成","天天开心",
+    "喜欢你","陪你到老","来日方长","遇见你真好","早安晚安",
+    "好好生活","慢慢来","我在呢","别难过","拥抱你","有我在",
+    "只喜欢你","最喜欢你","好想见你","心动是你",
+    "心里是你","眼里是你","梦里是你","想着你","念着你",
+    "你最甜","你最美","我钟意你","我稀罕你","我陪你","我等你",
+    "我选你","我懂你","温柔是你","浪漫是你",
+    "欢喜是你","例外是你","唯一是你","答案是你","晚安是你",
+    "早安是你","四季是你","三餐是你","星空是你","月亮是你","风景是你"
+  ];
+
+  /* ============ 挂在爱心粒子上的照片 ============ */
+  var PHOTO_DIR = "photos";
+  var PHOTO_FILES = [
+    "06c28e58809d5bfd1ef3753ce3daec80.jpg",
+    "07f36867fe0371be53a4eeae5370f5d8.jpg",
+    "1798d4ce3cf90c707d2b0468c2734e4a.jpg",
+    "35ff8b0c3c16ff1549b8cde3c91b85e8.jpg",
+    "3f18e1b3be26dd177dc3e93ab1b34abf.jpg",
+    "405a124381edebe531b08e4651cda92d.jpg",
+    "4c9fbc126c23b907aed235480bc2b869.jpg",
+    "4e5f68a4469a1648dbf8361b9896d06b.jpg",
+    "734e6ffa0fd683fa8a1a394231c0e572.jpg",
+    "81ff2b3e88b518463983c1ce67d0ae77.jpg",
+    "86725389510ae145be85074f8dd8577c.jpg",
+    "8bb2c1f99cc02e8317fec0b1f91cabce.jpg",
+    "ad19693f796ad524a92027af43ccf145.jpg",
+    "ca188db4b28b8e975ac481efe6151e9f.jpg",
+    "ca7205029855044eb6a39391e2e07d5d.jpg",
+    "cf140df5cf06bf5b1719c7c6458a9753.jpg",
+    "d8ade433b052b53f6fc8232236a1dba3.jpg",
+    "e87c7fa82a88b794efb10969764d2bed.jpg",
+    "ea112eada791c75c6c966234e80c1354.jpg",
+    "ed11ee10809a06ed0cf143ad698df528.jpg"
+  ];
+  function photoURL(f){ return encodeURIComponent(PHOTO_DIR) + "/" + encodeURIComponent(f); }
+  var PHOTOS = PHOTO_FILES.map(function(f){
+    var img = new Image();
+    img.src = photoURL(f);
+    return { src: img.src, img: img };
+  });
+  var PHOTO_MESSAGES = [
+    "存下这张","看了好多遍","隔着屏幕想你","期待见面","这张好喜欢",
+    "手机里的你","想你啦","盼着见面那天","谢谢你发我","今日份想你",
+    "好想见你一面","翻出来又看了"
+  ];
+
+  var canvas = document.getElementById("stage");
+  var ctx = canvas.getContext("2d");
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var W = 0, H = 0, DPR = 1;
+  var particles = [];   // 组成爱心的文字粒子
+  var floaters  = [];   // 周围漂浮的小爱心
+  var heartGrid = null; // 心形蒙版网格采样结果（只建一次）
+  var lbList = [];       // 挂了照片的粒子（用于弹窗翻页）
+  var lbIndex = 0;
+  var hoverPt = null;
+  var centerX = 0, centerY = 0, scale = 1;
+  var startT = performance.now();
+
+  // ===== 三阶段时间线（秒）：聚拢 → 停留 → 散开，之后循环 =====
+  var T_GATHER = 4.5, T_HOLD = 3.0, T_SCATTER = 4.0;
+  var CYCLE = T_GATHER + T_HOLD + T_SCATTER;
+
+  function easeInOut(t){ return 0.5 - 0.5*Math.cos(Math.PI*t); }
+
+  /* 当前爱心聚拢程度 0=全屏散布，1=完全聚拢成爱心 */
+  function heartFactor(t){
+    t = t % CYCLE;
+    if(t < T_GATHER){
+      var l = Math.max(0, Math.min(1, t / T_GATHER));
+      return easeInOut(l);
+    }
+    if(t < T_GATHER + T_HOLD){ return 1; }
+    var l2 = Math.max(0, Math.min(1, (t - T_GATHER - T_HOLD) / T_SCATTER));
+    return 1 - easeInOut(l2);
+  }
+
+  var BAKED_EDGE = [[1.089,-0.084],[0.122,-0.994],[-0.054,-0.994],[0.386,-0.812],[0.386,0.644],[0.122,0.371],[-0.670,0.644],[0.298,0.553],[-0.318,0.553],[1.001,0.462],[-0.494,-0.721],[1.089,0.007],[-0.406,0.644],[0.825,-0.448],[0.122,0.462],[-0.406,-0.812],[1.089,0.098],[-1.109,0.280],[0.210,0.553],[0.737,-0.448],[0.034,0.280],[-0.582,-0.630],[-0.670,-0.539],[-0.582,0.644],[0.561,-0.630],[0.913,0.553],[0.034,-0.994],[0.474,0.644],[0.825,0.553],[-0.230,0.553],[-0.758,-0.448],[-1.021,-0.175],[0.474,-0.721],[-0.494,0.644],[1.089,0.371],[-1.021,0.371],[0.298,-0.903],[-1.021,-0.084],[-1.109,0.189],[-0.054,0.371],[-0.142,0.462],[-1.021,0.462],[-0.230,-0.903],[-0.846,-0.357],[0.913,-0.357],[-0.846,0.553],[-0.758,0.644],[0.737,0.644],[0.210,-0.903],[0.649,-0.539],[0.561,0.644],[1.001,-0.175],[-0.934,0.553],[-0.318,-0.812],[-1.109,0.007],[0.913,-0.266],[-0.934,-0.266],[1.089,0.189],[0.649,0.644],[1.089,0.280],[-0.142,-0.994],[-1.109,0.098]];
+var BAKED_FILL = [[-0.846,0.007],[-0.670,0.007],[-0.318,0.007],[0.122,-0.630],[0.122,-0.266],[-0.582,0.007],[-0.846,0.371],[0.122,-0.448],[0.034,-0.448],[-0.934,-0.084],[0.649,0.462],[-0.582,0.280],[-0.758,0.007],[-0.406,0.189],[-0.582,0.098],[-0.670,0.462],[-0.494,0.462],[0.737,0.007],[-0.582,-0.175],[-0.494,-0.630],[-0.318,-0.266],[0.122,0.007],[0.825,0.098],[-0.670,-0.266],[0.474,-0.539],[0.825,0.280],[-0.934,0.371],[-0.318,-0.539],[-0.494,0.371],[-0.494,-0.084],[0.034,-0.084],[-0.142,-0.539],[-0.934,0.280],[-0.406,-0.084],[-0.230,-0.084],[0.649,-0.084],[-0.934,0.098],[0.034,0.007],[-0.758,0.189],[0.122,-0.175],[0.561,0.462],[-0.406,0.553],[0.034,-0.721],[-0.582,-0.084],[-0.406,-0.721],[-0.758,0.462],[-0.846,-0.084],[0.825,-0.266],[-0.230,-0.812],[0.122,0.098],[-0.494,-0.357],[-0.230,0.462],[0.561,-0.084],[0.913,0.007],[0.386,-0.721],[-0.406,-0.630],[-0.670,-0.084],[-0.670,0.371],[-0.142,-0.448],[-0.054,0.189],[-0.142,-0.903],[-0.054,0.098],[0.649,0.371],[-0.318,0.462],[-0.846,-0.175],[0.649,0.189],[-0.142,-0.175],[-0.054,-0.448],[0.649,-0.175],[-0.142,0.098],[0.034,-0.357],[0.034,-0.812],[0.210,-0.357],[-0.054,-0.357],[-0.406,-0.266],[0.474,0.280],[-0.494,0.007],[-0.230,-0.721],[0.298,-0.721],[1.001,0.371],[-0.582,-0.357],[0.210,0.371],[0.386,-0.539],[-0.846,-0.266],[0.034,-0.903],[0.737,0.098],[-0.846,0.189],[-0.142,-0.630],[0.386,-0.175],[0.298,-0.175],[0.298,0.280],[0.210,-0.539],[0.474,-0.266],[-0.142,-0.084],[0.210,0.098],[-0.758,-0.266],[0.474,0.189],[0.913,-0.084],[0.561,0.189],[-0.846,0.462],[0.386,-0.630],[0.737,-0.084],[0.298,0.371],[0.737,0.371],[-0.230,-0.175],[0.386,0.280],[-0.142,0.280],[0.210,-0.630],[0.386,-0.357],[0.649,0.007],[-0.054,-0.721],[-0.230,0.007],[-0.582,0.462],[0.122,-0.539],[-0.494,0.098],[-0.054,-0.175],[0.649,0.280],[0.298,0.007],[-0.230,0.371],[-0.054,0.280],[-1.021,0.189],[-0.318,0.098],[-0.934,0.462],[0.210,0.280],[-0.758,0.553],[0.474,-0.084],[0.561,-0.448],[-0.054,-0.812],[-0.934,-0.175],[-0.142,-0.812],[0.298,-0.539],[-0.406,-0.539],[0.386,0.189],[-0.406,-0.357],[0.649,-0.448],[0.298,-0.812],[-1.021,0.280],[-0.230,-0.630],[0.210,-0.812],[0.474,0.462],[-0.230,0.280],[0.825,0.007],[0.210,-0.448],[-0.142,0.007],[0.737,-0.266],[-0.758,0.280],[0.122,-0.084],[0.913,0.189],[-0.406,0.007],[0.825,0.189],[-0.406,-0.175],[0.210,-0.175],[-0.142,-0.266],[0.122,0.280],[-0.582,0.553],[0.034,-0.539],[-0.934,0.189],[0.386,-0.084],[-0.758,0.371],[0.474,0.553],[0.122,0.189],[0.034,-0.266],[1.001,0.280],[0.034,-0.630],[-0.318,0.371],[0.386,0.098],[-0.494,0.553],[0.298,-0.448],[0.825,-0.175],[0.474,0.007],[0.561,0.371],[0.386,0.007],[0.298,-0.630],[0.649,-0.357],[0.913,0.462],[0.474,-0.357],[0.298,0.462],[0.649,0.553],[-1.021,0.098],[1.001,0.189],[-0.670,0.553],[0.649,0.098],[-0.582,-0.539],[0.386,-0.266],[0.122,-0.721],[0.825,0.371],[-0.318,-0.357],[0.034,0.189],[-0.582,-0.266],[-0.494,-0.539],[0.210,-0.721],[-0.054,-0.630],[-0.582,-0.448],[-0.230,-0.448],[-0.582,0.189],[-0.142,-0.721],[0.561,-0.175],[-0.230,-0.357],[-0.142,0.189],[0.210,0.189],[0.034,0.098],[-0.758,-0.357],[-0.758,-0.175],[-0.494,0.189],[0.298,-0.357],[1.001,0.007],[0.561,0.098],[0.737,-0.357],[-0.934,0.007],[0.913,0.280],[-0.758,0.098],[0.913,0.371],[0.825,0.462],[0.210,-0.084],[-0.406,0.462],[0.210,0.007],[0.561,-0.357],[0.474,0.371],[0.474,-0.448],[-0.406,-0.448],[-0.142,0.371],[-0.670,0.189],[-0.670,0.098],[0.561,-0.266],[-0.582,0.371],[0.122,-0.357],[-0.318,0.280],[-0.318,-0.175],[0.737,0.189],[-0.670,0.280],[0.561,-0.539],[0.913,-0.175],[0.386,0.371],[0.737,0.462],[1.001,0.098],[0.298,0.189],[-0.494,-0.175],[-0.494,-0.266],[0.561,0.280],[0.034,-0.175],[-0.230,0.098],[-0.318,-0.084],[-0.318,-0.448],[-0.494,-0.448],[0.474,-0.630],[0.649,-0.266],[-0.054,-0.084],[0.298,0.098],[-0.054,-0.903],[-0.846,0.098],[-0.318,-0.630],[-0.406,0.371],[-0.406,0.098],[0.825,-0.357],[0.474,-0.175],[-0.494,0.280],[-0.670,-0.357],[-0.670,-0.448],[0.298,-0.084],[0.737,0.280],[-0.230,-0.539],[0.210,-0.266],[0.737,-0.175],[-0.406,0.280],[0.298,-0.266],[-0.054,-0.266],[0.386,-0.448],[-0.230,-0.266],[0.386,0.462],[0.474,0.098],[0.386,0.553],[0.122,-0.903],[-0.054,0.007],[0.737,0.553],[-0.054,-0.539],[-0.846,0.280],[0.825,-0.084],[1.001,-0.084],[0.210,0.462],[0.561,0.553],[0.122,-0.812],[-0.758,-0.084],[-0.142,-0.357],[0.913,0.098],[-0.230,0.189],[-1.021,0.007],[-0.318,-0.721],[-0.318,0.189],[-0.670,-0.175],[0.561,0.007]];
+
+  function shuffle(arr){
+    for(var i=arr.length-1;i>0;i--){
+      var j=(Math.random()*(i+1))|0;
+      var tmp=arr[i]; arr[i]=arr[j]; arr[j]=tmp;
+    }
+    return arr;
+  }
+
+  function roundRect(c, x, y, w, h, r){
+    c.beginPath();
+    c.moveTo(x+r, y);
+    c.arcTo(x+w, y, x+w, y+h, r);
+    c.arcTo(x+w, y+h, x, y+h, r);
+    c.arcTo(x, y+h, x, y, r);
+    c.arcTo(x, y, x+w, y, r);
+    c.closePath();
+  }
+
+  /* 心形点位：与 py 版蒙版采样一致（轮廓点 / 内部点，标准坐标 y 向上） */
+  function buildHeartGrid(){
+    var edge = BAKED_EDGE.map(function(p){ return {x:p[0], y:p[1]}; });
+    var fill = BAKED_FILL.map(function(p){ return {x:p[0], y:p[1]}; });
+    return {edge:shuffle(edge), fill:shuffle(fill)};
+  }
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W * DPR; canvas.height = H * DPR;
+    canvas.style.width = W + "px"; canvas.style.height = H + "px";
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    centerX = W/2;
+    centerY = H/2 - H*0.02;
+    // 爱心更大：系数越小爱心越大
+    scale = Math.min(W/2.3, H/2.45);
+    paintBackground();
+    buildParticles();
+  }
+
+  /* 绘制静态底色 + 极淡径向光晕 */
+  function paintBackground(){
+    ctx.fillStyle = "#07060a";
+    ctx.fillRect(0,0,W,H);
+    var g = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, Math.min(W,H)*0.6);
+    g.addColorStop(0, "rgba(255,45,85,0.10)");
+    g.addColorStop(1, "rgba(7,6,10,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,W,H);
+  }
+
+  var EDGE_COLORS = ["#ff2d55","#ff4d6d","#ff5c8a"];
+  var FILL_COLORS = ["#ff7fa5","#ff9db8","#ffb3c8"];
+  var FLOATER_COLORS = EDGE_COLORS.concat(FILL_COLORS);
+
+  function pickColor(edge){
+    var pool = edge ? EDGE_COLORS : FILL_COLORS;
+    return pool[(Math.random()*pool.length)|0];
+  }
+
+  function buildParticles(){
+    particles = [];
+    if(!heartGrid) heartGrid = buildHeartGrid();
+    // 粒子数量随面积自适应，保证饱满但不卡死
+    var count = Math.round(Math.min(400, Math.max(340, (W*H)/5000)));
+    var edgeN = Math.round(count*0.45);
+    var edgePts = heartGrid.edge.slice();
+    var fillPts = heartGrid.fill.slice();
+    // 轮廓点不够时从内部点借补
+    while(edgePts.length < edgeN && fillPts.length) edgePts.push(fillPts.pop());
+    for(var i=0;i<count;i++){
+      var isEdge = i < edgeN;
+      var p = isEdge ? edgePts[i] : fillPts[i-edgeN];
+      if(!p) p = fillPts[0] || {x:0, y:0};
+      var pool = isEdge ? EDGE_MESSAGES : MESSAGES;
+      var msg = pool[(Math.random()*pool.length)|0];
+      // 全屏散布目标（贴近四边铺满整个屏幕）
+      var fx = W * (0.02 + Math.random()*0.96);
+      var fy = H * (0.02 + Math.random()*0.96);
+      particles.push({
+        tx: p.x, ty: p.y, edge: isEdge,  // 目标（爱心坐标）
+        fx: fx, fy: fy,                   // 全屏散布坐标
+        x: fx, y: fy,
+        text: msg,
+        color: pickColor(isEdge),
+        size: isEdge ? 10 + Math.random()*1 : 9 + Math.random()*1,
+        // 相位：用于呼吸抖动
+        phase: Math.random()*Math.PI*2,
+        phaseSpeed: 0.6 + Math.random()*0.8,
+        // 小概率放大字
+        big: Math.random() < 0.08,
+        photo: null,   // 挂载的照片（无则为普通文字粒子）
+        box: null      // 高亮框命中区域
+      });
+    }
+    assignPhotos();
+    buildFloaters();
+  }
+
+  /* 随机挑一部分粒子挂上照片，分散在爱心里 */
+  function assignPhotos(){
+    lbList = [];
+    var photoN = Math.min(PHOTOS.length, particles.length);
+    var order = shuffle(particles.map(function(_, i){ return i; }));
+    for(var k=0;k<photoN;k++){
+      var pt = particles[order[k]];
+      pt.photo = PHOTOS[k % PHOTOS.length];
+      pt.text = PHOTO_MESSAGES[k % PHOTO_MESSAGES.length];
+      pt.color = "#ffe9c2";
+      pt.big = false;
+      lbList.push(pt);
+    }
+  }
+
+  function buildFloaters(){
+    floaters = [];
+    var n = Math.round(Math.min(26, Math.max(12, W/60)));
+    for(var i=0;i<n;i++){
+      floaters.push(newFloater(true));
+    }
+  }
+
+  function newFloater(anywhere){
+    return {
+      x: Math.random()*W,
+      y: anywhere ? Math.random()*H : H + 20,
+      size: 8 + Math.random()*14,
+      speed: 0.25 + Math.random()*0.5,
+      drift: (Math.random()-0.5)*0.4,
+      alpha: 0.25 + Math.random()*0.45,
+      color: FLOATER_COLORS[(Math.random()*FLOATER_COLORS.length)|0],
+      wobble: Math.random()*Math.PI*2
+    };
+  }
+
+  function drawHeartShape(f, x, y, size, color, alpha){
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.scale(size/16, size/16);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(0, 4);
+    ctx.bezierCurveTo(-9, -5, -4, -13, 0, -6);
+    ctx.bezierCurveTo(4, -13, 9, -5, 0, 4);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function frame(now){
+    var t = (now - startT)/1000;
+    ctx.clearRect(0,0,W,H);
+    paintBackground();
+
+    // 漂浮小爱心
+    for(var f=0;f<floaters.length;f++){
+      var fl = floaters[f];
+      fl.y -= fl.speed;
+      fl.x += fl.drift + Math.sin(t*1.2 + fl.wobble)*0.25;
+      fl.wobble += 0.02;
+      if(fl.y < -30){ floaters[f] = newFloater(false); continue; }
+      drawHeartShape(fl, fl.x, fl.y, fl.size, fl.color, fl.alpha);
+    }
+
+    // 心跳缩放：两段脉冲叠加
+    var beat = 1 + 0.04*Math.sin(t*3.4) + 0.02*Math.max(0, Math.sin(t*6.8));
+    var heartK = reduced ? 1 : heartFactor(t);
+
+    // 文字粒子
+    for(var i=0;i<particles.length;i++){
+      var pt = particles[i];
+
+      // 目标屏幕坐标（爱心 y 轴向下，故取负）
+      var gx = centerX + pt.tx * scale * beat;
+      var gy = centerY - pt.ty * scale * beat;
+
+      // 呼吸偏移：聚拢时才保留轻微抖动
+      var breathe = reduced ? 0 : Math.sin(t*pt.phaseSpeed + pt.phase)*0.8*heartK;
+
+      var cx = pt.fx + (gx - pt.fx)*heartK;
+      var cy = pt.fy + (gy - pt.fy)*heartK;
+      pt.x = cx; pt.y = cy + breathe;
+
+      ctx.save();
+      ctx.globalAlpha = reduced ? 1 : (0.55 + 0.45*heartK);
+      ctx.font = (pt.big ? 700 : 500) + " " + pt.size + "px " +
+                 '"Microsoft YaHei","PingFang SC",system-ui,sans-serif';
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+
+      if(pt.photo){
+        var tw = ctx.measureText(pt.text).width;
+        var bw = tw + 14, bh = pt.size + 9;
+        pt.box = {w:bw, h:bh};
+        var isHover = pt === hoverPt;
+        ctx.shadowColor = "rgba(255,209,102,.85)";
+        ctx.shadowBlur = isHover ? 12 : 7;
+        roundRect(ctx, pt.x-bw/2, pt.y-bh/2, bw, bh, 7);
+        ctx.fillStyle = isHover ? "rgba(255,209,102,.25)" : "rgba(255,209,102,.13)";
+        ctx.fill();
+        ctx.lineWidth = 1.4;
+        ctx.strokeStyle = "#ffd98a";
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#ffe9c2";
+        ctx.fillText(pt.text, pt.x, pt.y);
+      } else {
+        pt.box = null;
+        ctx.fillStyle = pt.color;
+        ctx.fillText(pt.text, pt.x, pt.y);
+      }
+      ctx.restore();
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  function replay(){
+    closeLightbox();
+    startT = performance.now();
+    buildParticles();
+  }
+
+  /* ===== 照片弹窗 ===== */
+  var lb = document.getElementById("lightbox");
+  var lbImg = document.getElementById("lb-img");
+  var lbCaption = document.getElementById("lb-caption");
+  var lbCount = document.getElementById("lb-count");
+
+  function particleAt(mx, my){
+    for(var i=0;i<particles.length;i++){
+      var pt = particles[i];
+      if(!pt.photo || !pt.box) continue;
+      if(Math.abs(mx-pt.x) <= pt.box.w/2 + 4 &&
+         Math.abs(my-pt.y) <= pt.box.h/2 + 4) return pt;
+    }
+    return null;
+  }
+
+  function renderLb(){
+    if(!lbList.length) return;
+    var pt = lbList[lbIndex];
+    lbImg.src = pt.photo.src;
+    lbCaption.textContent = pt.text;
+    lbCount.textContent = (lbIndex+1) + " / " + lbList.length;
+  }
+
+  function openLightbox(i){
+    if(!lbList.length) return;
+    lbIndex = (i + lbList.length) % lbList.length;
+    renderLb();
+    lb.hidden = false;
+  }
+
+  function closeLightbox(){
+    lb.hidden = true;
+    lbImg.src = "";
+  }
+
+  function stepLb(dir){
+    lbIndex = (lbIndex + dir + lbList.length) % lbList.length;
+    renderLb();
+  }
+
+  canvas.addEventListener("mousemove", function(e){
+    var r = canvas.getBoundingClientRect();
+    var pt = particleAt(e.clientX - r.left, e.clientY - r.top);
+    hoverPt = pt;
+    canvas.style.cursor = pt ? "pointer" : "default";
+  });
+  canvas.addEventListener("click", function(e){
+    var r = canvas.getBoundingClientRect();
+    var pt = particleAt(e.clientX - r.left, e.clientY - r.top);
+    if(pt) openLightbox(lbList.indexOf(pt));
+  });
+
+  document.getElementById("lb-close").addEventListener("click", closeLightbox);
+  document.getElementById("lb-backdrop").addEventListener("click", closeLightbox);
+  document.getElementById("lb-prev").addEventListener("click", function(e){ e.stopPropagation(); stepLb(-1); });
+  document.getElementById("lb-next").addEventListener("click", function(e){ e.stopPropagation(); stepLb(1); });
+  window.addEventListener("keydown", function(e){
+    if(lb.hidden) return;
+    if(e.key === "Escape") closeLightbox();
+    else if(e.key === "ArrowLeft") stepLb(-1);
+    else if(e.key === "ArrowRight") stepLb(1);
+  });
+
+  window.addEventListener("resize", resize);
+  document.getElementById("replay").addEventListener("click", replay);
+
+  /* ===== 背景音乐（需点击后播放，不自动出声） ===== */
+  var bgm = document.getElementById("bgm");
+  var musicBtn = document.getElementById("musicBtn");
+  bgm.volume = 0.4;
+
+  function setMusicUI(on){
+    musicBtn.classList.toggle("playing", on);
+    musicBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    musicBtn.setAttribute("aria-label", on ? "暂停背景音乐" : "播放背景音乐");
+  }
+  function toggleMusic(){
+    if(reduced) return; // 减弱动态效果：不启用音频
+    if(bgm.paused){
+      var p = bgm.play();
+      if(p && p.catch) p.catch(function(){ setMusicUI(false); });
+    } else {
+      bgm.pause();
+    }
+  }
+  musicBtn.addEventListener("click", toggleMusic);
+  bgm.addEventListener("play", function(){ setMusicUI(true); });
+  bgm.addEventListener("pause", function(){ setMusicUI(false); });
+  bgm.addEventListener("error", function(){ musicBtn.disabled = true; });
+  if(reduced){ musicBtn.disabled = true; }
+
+  resize();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

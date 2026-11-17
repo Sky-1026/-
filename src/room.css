@@ -239,6 +239,55 @@
   100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.82) rotate(var(--rot)); }
 }
 
+/* ── 表白页全屏层：iframe 里那页自己管画布，这里只负责铺满、退出和遮掉房间 UI ──
+   它的音乐按钮在右上、"再看一次"在右下，所以我们的退出按钮只放左上，不抢位置。 */
+.confess-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 160;
+  background: #07060a;
+  animation: room-fade .3s ease both;
+}
+
+.confess-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+  background: #07060a;
+}
+
+.confess-top {
+  position: absolute;
+  left: 0; top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+}
+
+.confess-top button,
+.confess-top a {
+  font: 400 11px / 1 'DM Mono', 'Noto Sans SC', monospace;
+  letter-spacing: .1em;
+  text-decoration: none;
+  padding: 9px 13px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 157, 184, .45);
+  background: rgba(20, 10, 14, .72);
+  color: #ffd9e3;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.confess-top button:hover, .confess-top button:focus-visible,
+.confess-top a:hover, .confess-top a:focus-visible { background: #ff2d55; border-color: #ff2d55; color: #fff; outline: none; }
+.confess-top i { font-style: normal; opacity: .6; margin-left: 5px; }
+
 /* ── 窄屏兜底列表 ── */
 .room-list { display: none; }
 
@@ -446,5 +495,6 @@
   .room-figure img { transition: none; }
   .room-hot, .room-hot::before, .room-hot::after, .room-note-text { transition: none; }
   .room-scrim, .room-panel { animation: none; }
+  .confess-layer, .confess-top button, .confess-top a { animation: none; transition: none; }
   .room-panel { transform: translate(-50%, 0); }
 }
