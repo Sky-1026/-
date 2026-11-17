@@ -3,8 +3,8 @@ import { createPortal } from 'react-dom'
 import { nodes, hotspots, byId, isReady, slotsOf, posters } from './modules'
 import Shots from './Shots'
 
-const TOTAL_POSES = 10
-const IDLE = 10                                   // 放松站立：没有 hover 时回到它
+const TOTAL_POSES = 11
+const IDLE = 10                                   // 放松站立：没有 hover 时回到它；11 是「喜欢」的双手比心
 const POSES = Array.from(
   { length: TOTAL_POSES },
   (_, i) => `/assets/room/poses/pose-${String(i + 1).padStart(2, '0')}.webp`,
