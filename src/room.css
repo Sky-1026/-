@@ -83,15 +83,16 @@
 
 .room-figure img[data-on="on"] { opacity: 1; }
 
-/* ── 墙上的海报：深色木框 + 白卡纸边，压在便利贴那一片墙上 ── */
+/* ── 墙上的海报：深色细线 + 木框（取镜框那个色 149,117,88）+ 卡纸 ──
+   图本身已经按房间色卡压成暖炭灰双色调，所以这里不再加 filter 二次处理。 */
 .room-poster {
   position: absolute;
   box-sizing: border-box;
-  padding: 1.4% 1.2%;
-  background: #f2ede5;
-  border: 3px solid rgba(38, 32, 26, .78);
-  border-radius: 4px;
-  box-shadow: 0 16px 30px rgba(30, 26, 20, .28), inset 0 0 0 1px rgba(255, 255, 255, .55);
+  padding: 1.5% 1.3%;
+  background: #eee7dc;
+  border: 2px solid rgba(26, 22, 18, .85);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 12px #95755a, 0 16px 30px rgba(30, 26, 20, .26);
   transform: rotate(var(--tilt, 0deg));
   pointer-events: none;
 }
@@ -101,7 +102,6 @@
   width: 100%; height: 100%;
   object-fit: cover;
   border-radius: 1px;
-  filter: saturate(.92) contrast(1.02);
 }
 
 /* ── 热点 ── */
