@@ -1,10 +1,45 @@
 import React, { useEffect } from 'react'
-import { byId, pageIds, nodes, isReady } from './modules'
+import { byId, pageIds, nodes, isReady, slotsOf } from './modules'
 import Shots, { Placeholder } from './Shots'
 
-/* ── 单个槽位：六种类型，以后只往 items 里加东西 ── */
+/* ── 单个槽位：类型定版式，以后只往 items 里加东西 ── */
 function Slot({ s }) {
   if (s.type === 'para') return <p className="mod-text">{s.text}</p>
+
+  if (s.type === 'paras') {
+    const texts = s.texts || []
+    if (!texts.length) return <Placeholder label="TEXT" note={s.empty || '等你写。'}/>
+    return (
+      <section className="mod-slot">
+        {s.title && <h4>{s.title}</h4>}
+        {texts.map((t, i) => <p className="mod-text" key={i}>{t}</p>)}
+      </section>
+    )
+  }
+
+  if (s.type === 'cards') {
+    const items = s.items || []
+    if (!items.length) return <Placeholder label="CARDS" note={s.empty || '等一条真实记录。'}/>
+    return (
+      <section className="mod-slot">
+        <h4>{s.title}</h4>
+        <div className="mod-cards">
+          {items.map(p => (
+            <article className="mod-card" key={p.number}>
+              <header>
+                <span className="mod-card-no">{p.number}</span>
+                <h5>{p.title}</h5>
+                <em>{p.en}</em>
+              </header>
+              <p className="mod-card-meta">{p.meta}</p>
+              <p className="mod-text">{p.description}</p>
+              <ul className="mod-tags">{p.tags.map(t => <li key={t}>{t}</li>)}</ul>
+            </article>
+          ))}
+        </div>
+      </section>
+    )
+  }
 
   if (s.type === 'links') return (
     <section className="mod-slot">
@@ -23,7 +58,7 @@ function Slot({ s }) {
   if (s.type === 'shots') return (
     <section className="mod-slot">
       <h4>{s.title}</h4>
-      <Shots kind={s.gallery} empty={s.empty}/>
+      <Shots kind={s.gallery} items={s.items} empty={s.empty}/>
     </section>
   )
 
@@ -87,7 +122,7 @@ export default function ModulePage({ id }) {
       </div>
 
       <div className="mod-body">
-        {(m.slots || []).map((s, k) => <Slot key={k} s={s}/>)}
+        {slotsOf(m).map((s, k) => <Slot key={k} s={s}/>)}
       </div>
 
       <nav className="mod-foot" aria-label="上一个 / 下一个模块">

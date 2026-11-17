@@ -1,4 +1,5 @@
 import { experience } from './experienceData'
+import { projects } from './workData'
 
 /* ────────────────────────────────────────────────────────────
    平台唯一的结构定义。
@@ -126,20 +127,28 @@ export const nodes = [
 
   {
     id: 'work', label: '精选项目', en: 'SELECTED WORK', hint: '数据 · 建模 · 能源',
-    kicker: 'PROJECTS / 精选项目', title: '三个能讲清楚的项目',
-    lead: '项目详情写在简历页里，这一格只负责把你送到那一段。',
-    body: ['等模块页都填上真内容后，项目会从简历里拆出来单独一页。'],
-    go: '#/resume?to=work',
+    kicker: 'SELECTED WORK / 精选项目', title: '四个项目，四种把问题拆开的方式',
+    lead: '能源市场、工业设备、运动学、交通流：每个都从数据口径开始，到能被别人复现的结论结束。',
+    body: ['项目清单只有 src/workData.js 一份，这一格和简历页的项目区块读同一份数据，不会长成两个版本。'],
     spot: { kind: 'prop', x: 70.5, y: 36.5, w: 19.5, h: 15.5, pose: 4 },
+    slots: [
+      { type: 'cards', title: 'PROJECTS', items: projects },
+      { type: 'frame', title: '可复现的附件', kind: 'REPO · 数据 · 结果图', ratio: '16 / 9',
+        empty: '等你给仓库地址、数据来源和结果图，我再按项目一行一行挂上去；没有之前这里就空着。' },
+    ],
   },
 
   {
     id: 'tug', label: '拔河队', en: 'TUG OF WAR', hint: '节奏比力量更重要',
     kicker: 'TUG OF WAR / 拔河队', title: '八个人一个节拍',
-    lead: '校拔河队发力核心，两个赛季各拿下一个冠军。',
-    body: ['完整段落、三张赛场图和奖学金证书都在简历页的经历区里。'],
-    go: '#/resume?to=experience',
+    lead: '校拔河队，位置是发力核心：把八个人的输出压到同一个节拍上，比一个人多使三分力有用。',
+    body: ['这一段文字、名次和照片与 experienceData 同源，简历页写的是经历顺序，这里只留拔河本身。'],
     spot: { kind: 'prop', x: 41.5, y: 78.5, w: 11.5, h: 10.0, pose: 3 },
+    slots: [
+      { type: 'stats', title: '名次与荣誉', columns: ['项目', '记录'], from: 'tugofwar' },
+      { type: 'paras', title: '两个赛季', from: 'tugofwar' },
+      { type: 'shots', title: '赛场与证书', from: 'tugofwar' },
+    ],
   },
 
   {
@@ -183,10 +192,27 @@ export const pageIds = pages.map(n => n.id)
 /* 有没有真内容不由我手写 status 决定，看槽位里到底有没有条目，
    免得我忘了改，让一个空格子自称"已完成"。 */
 export function isReady(n) {
-  return (n.slots || []).some(s => {
-    if (s.type === 'shots') return buildGallery(s.gallery).length > 0
-    if (s.type === 'para' || s.type === 'frame') return false
+  return slotsOf(n).some(s => {
+    if (s.type === 'shots') return (s.items || buildGallery(s.gallery)).length > 0
+    if (s.type === 'para' || s.type === 'paras' || s.type === 'frame') return false
     return (s.items || []).length > 0
+  })
+}
+
+const expById = id => experience.find(e => e.id === id)
+
+/* 写了 from 的槽位，渲染前从同一份经历数据里把内容取过来：
+   文字、名次、照片只在 experienceData.js 维护一处，
+   拔河这一格和简历页读的是同一条记录。 */
+export function slotsOf(n) {
+  return (n.slots || []).map(s => {
+    if (!s.from) return s
+    const e = expById(s.from)
+    if (!e) return s
+    if (s.type === 'paras') return { ...s, texts: e.body }
+    if (s.type === 'stats') return { ...s, items: e.facts }
+    if (s.type === 'shots') return { ...s, items: e.gallery.map(g => ({ ...g, org: e.org, date: e.date })) }
+    return s
   })
 }
 

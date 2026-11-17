@@ -148,6 +148,40 @@
 .mod-links a { border-bottom: 1.5px solid rgba(241, 65, 32, .4); }
 .mod-links a:hover { color: var(--red); }
 
+/* ── 卡片：项目这种"一条有好几行"的内容 ── */
+.mod-cards { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+.mod-card {
+  display: grid;
+  gap: 10px;
+  padding: clamp(16px, 2vw, 22px);
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
+  background: var(--card);
+  transition: border-color .2s ease, transform .26s cubic-bezier(.16, 1, .3, 1);
+}
+
+.mod-card:hover { border-color: rgba(241, 65, 32, .55); transform: translateY(-2px); }
+
+.mod-card header { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.mod-card header h5 { margin: 0; font: 700 clamp(17px, 1.8vw, 21px) / 1.25 'Noto Sans SC', sans-serif; letter-spacing: -.01em; }
+.mod-card header em { font: 400 9px / 1.4 'DM Mono', monospace; letter-spacing: .16em; color: #837d74; font-style: normal; }
+
+.mod-card-no { font: 400 11px / 1 'DM Mono', monospace; letter-spacing: .1em; color: var(--red); }
+.mod-card-meta { margin: 0; font: 400 12px / 1.6 'DM Mono', 'Noto Sans SC', monospace; color: #5a564f; }
+.mod-card .mod-text { margin: 0; }
+
+.mod-tags { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 0; padding: 0; }
+
+.mod-tags li {
+  font: 400 11px / 1 'DM Mono', 'Noto Sans SC', monospace;
+  letter-spacing: .04em;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(23, 25, 29, .18);
+  color: #4c4a45;
+}
+
 /* ── 占位框：图 / 视频 / 图表的位置，只有虚线和说明 ── */
 .mod-frame {
   display: grid;
@@ -203,9 +237,11 @@
   .mod-loc { display: none; }
   .mod-tr { grid-template-columns: 1fr; gap: 2px; }
   .mod-tr.is-head { display: none; }
+  .mod-cards { grid-template-columns: 1fr; }
   .mod-foot { justify-content: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mod-bar > a, .mod-tabs a, .mod-foot a, .mod-links a { transition: none; }
+  .mod-bar > a, .mod-tabs a, .mod-foot a, .mod-links a, .mod-card { transition: none; }
+  .mod-card:hover { transform: none; }
 }

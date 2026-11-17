@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { nodes, hotspots, byId, isReady } from './modules'
+import { nodes, hotspots, byId, isReady, slotsOf } from './modules'
 import Shots from './Shots'
 
 const TOTAL_POSES = 10
@@ -32,7 +32,7 @@ function RoomSheet({ id, onClose }) {
 
   if (!node) return null
   const ready = isReady(node)
-  const slots = node.slots || []
+  const slots = slotsOf(node)
   const shotSlot = slots.find(s => s.type === 'shots')
   const linkSlot = slots.find(s => s.type === 'links')
   const pending = slots.filter(s => s.empty)
@@ -65,7 +65,7 @@ function RoomSheet({ id, onClose }) {
             </ul>
           )}
 
-          {shotSlot && <Shots kind={shotSlot.gallery}/>}
+          {shotSlot && <Shots kind={shotSlot.gallery} items={shotSlot.items}/>}
 
           {pending.length > 0 && (
             <ul className="room-todo">

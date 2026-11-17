@@ -2,9 +2,11 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { buildGallery } from './modules'
 
 /* 实拍图栅格 + 大图查看。房间面板和模块页共用这一份。
-   图片永远从 experienceData 里取，不另外维护清单。 */
-export default function Shots({ kind, empty = '还没有可展示的照片。' }) {
-  const items = useMemo(() => buildGallery(kind), [kind])
+   items 由外面给（比如拔河那一格只给自己的三张图），
+   没给就按 kind 从全部经历里抽，两条路都不另外维护清单。 */
+export default function Shots({ kind, items: given, empty = '还没有可展示的照片。' }) {
+  const built = useMemo(() => (kind ? buildGallery(kind) : []), [kind])
+  const items = given || built
   const [zoom, setZoom] = useState(-1)
   const zoomRef = useRef(-1)
   const countRef = useRef(items.length)
