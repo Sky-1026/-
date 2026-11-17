@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { nodes, hotspots, byId, isReady, slotsOf, posters } from './modules'
 import Shots from './Shots'
+import { ConfessBox, HeartBurst } from './Confess'
 
 const TOTAL_POSES = 11
 const IDLE = 10                                   // 放松站立：没有 hover 时回到它；11 是「喜欢」的双手比心
@@ -12,7 +13,7 @@ const POSES = Array.from(
 const poseOf = id => hotspots.find(h => h.id === id)?.pose ?? null
 
 /* ─────────── 房间面板：一眼预览，剩下的在模块页里 ─────────── */
-function RoomSheet({ id, onClose }) {
+function RoomSheet({ id, onClose, onBurst }) {
   const node = byId[id]
 
   useEffect(() => {
@@ -54,6 +55,8 @@ function RoomSheet({ id, onClose }) {
           <p className="room-lead">{node.lead}</p>
           {node.body?.map((t, i) => <p className="room-text" key={i}>{t}</p>)}
 
+          {node.confess && <ConfessBox data={node.confess} onBurst={onBurst}/>}
+
           {linkSlot && (
             <ul className="room-links">
               {linkSlot.items.map(l => (
@@ -89,6 +92,7 @@ export default function Room() {
   const [hover, setHover] = useState(null)
   const [held, setHeld] = useState(null)          // 打开面板的那件物品，面板期间保持姿势
   const [open, setOpen] = useState(null)
+  const [burst, setBurst] = useState(0)           // 每 +1 甩一片爱心，只有挂 confess 的物品会推它
 
   const activeId = open ? held : hover
   const pose = poseOf(activeId) ?? IDLE
@@ -107,6 +111,7 @@ export default function Room() {
 
   const pick = h => {
     setHeld(h.id)
+    if (h.confess) setBurst(b => b + 1)
     if (h.go) { window.location.hash = h.go; setHeld(null) }
     else setOpen(h.id)
   }
@@ -161,18 +166,24 @@ export default function Room() {
             </>
           )}
         </p>
+
+        {/* 爱心飘层盖在所有东西之上，但 pointer-events 关掉，不抢点击 */}
+        <HeartBurst seed={burst}/>
       </div>
 
       {/* 窄屏兜底：房间还是那张图，但入口再给一份可点列表 */}
       <nav className="room-list" aria-label="模块入口">
         {entries.map(n => (
-          <button key={n.id} onClick={() => (n.go ? window.location.hash = n.go : setOpen(n.id))}>
+          <button key={n.id} onClick={() => {
+            if (n.confess) setBurst(b => b + 1)
+            if (n.go) window.location.hash = n.go; else setOpen(n.id)
+          }}>
             <small>{n.en}</small><strong>{n.label}</strong><span>{n.hint}</span>
           </button>
         ))}
       </nav>
 
-      {open && <RoomSheet id={open} onClose={close}/>}
+      {open && <RoomSheet id={open} onClose={close} onBurst={() => setBurst(b => b + 1)}/>}
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import { byId, pageIds, nodes, isReady, slotsOf } from './modules'
 import Shots, { Placeholder } from './Shots'
+import { ConfessBox } from './Confess'
 
 /* ── 单个槽位：类型定版式，以后只往 items 里加东西 ── */
 function Slot({ s }) {
@@ -119,6 +120,7 @@ export default function ModulePage({ id }) {
         <h1>{m.title}</h1>
         <p className="mod-lead">{m.lead}</p>
         {m.body?.map((t, k) => <p className="mod-text" key={k}>{t}</p>)}
+        {m.confess && <ConfessBox data={m.confess}/>}
       </div>
 
       <div className="mod-body">

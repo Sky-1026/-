@@ -11,9 +11,13 @@
   --paper: #d9d4cb;
   --ink: #17191d;
   --red: #f14120;
-  /* 站点红只做底色和描边；一旦当字用（编号、链接 hover）就要压深一档，
+  /* 站点红只做底色和描边；一旦当字用（编号、链接 hover、表白按钮）就要压深一档，
      #f14120 在米色卡上只有 3.4:1，11px 的编号几乎看不清。 */
   --red-ink: #a82c14;
+  /* --line / --card 也放这一层：面板是 portal 到 body 的，
+     只写在 .mod 上的话面板里的 .confess 取不到值，卡片底色会退成透明。 */
+  --line: rgba(23, 25, 29, .16);
+  --card: #f6f2ea;
 }
 
 .room {
@@ -208,6 +212,32 @@
 .room-readout strong { font: 700 clamp(12px, 1.15vw, 16px) / 1 'Noto Sans SC', sans-serif; }
 /* 读数条是深色药丸，所以这里反过来要"浅字"：原来的 #a9a49c 在药丸底上只有 2.6:1。 */
 .room-readout span { font: 400 clamp(9px, .82vw, 12px) / 1.3 'DM Mono', monospace; letter-spacing: .08em; color: #d2cec6; }
+
+/* ── 表白爱心飘层：只在点墙上那颗心时出现，16 片飘完自己清空 ──
+   偏移量是触发时按舞台实际像素算好写进 style 的，所以这里只负责动。 */
+.room-hearts {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.room-hearts svg {
+  position: absolute;
+  fill: var(--red);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation-name: room-heart;
+  animation-timing-function: cubic-bezier(.22, .68, .3, 1);
+  animation-fill-mode: forwards;
+}
+
+@keyframes room-heart {
+  0%   { opacity: 0; transform: translate(0, 0) scale(.45) rotate(0deg); }
+  12%  { opacity: .96; transform: translate(calc(var(--dx) * .05), calc(var(--dy) * -.06)) scale(1.08) rotate(calc(var(--rot) * .12)); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(.82) rotate(var(--rot)); }
+}
 
 /* ── 窄屏兜底列表 ── */
 .room-list { display: none; }
@@ -411,6 +441,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* 表白爱心也不飘：JS 里已经拦了，这里再兜一层，防止旧缓存的脚本还生成 */
+  .room-hearts { display: none; }
   .room-figure img { transition: none; }
   .room-hot, .room-hot::before, .room-hot::after, .room-note-text { transition: none; }
   .room-scrim, .room-panel { animation: none; }

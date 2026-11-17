@@ -102,6 +102,13 @@ export const nodes = [
       '内容等你给——我不替你挑歌，也不替你写理由。',
     ],
     spot: { kind: 'prop', x: 88.6, y: 7.6, w: 5.4, h: 11.2, pose: 11 },
+    /* 表白功能挂在爱心的热区上：点墙上那颗心 = 甩出一片爱心 + 打开这一块。
+       文案是我写的占位，你要改成自己那句话直接替换 text。 */
+    confess: {
+      kicker: 'CONFESS / 表白',
+      text: '这颗心是画上去的，喜欢不是。按一下就当你知道。',
+      note: '计数只存在你这台设备的浏览器里（localStorage），不是全站数字——静态站没有后端，要共享得再接一层。',
+    },
     slots: [
       { type: 'list', title: '清单', columns: ['类别', '内容', '为什么留下'], items: [],
         empty: '四行位置留好：在听 / 在看 / 在读 / 一句话。' },
@@ -204,10 +211,11 @@ export const nodes = [
   },
 ]
 
-/* 房间里的可点物品（姿势唯一，数量 ≤ 9） */
+/* 房间里的可点物品（姿势唯一） */
 export const hotspots = nodes
   .filter(n => n.spot)
-  .map(n => ({ ...n.spot, id: n.id, label: n.label, en: n.en, hint: n.hint, go: n.go, page: n.slots ? n.id : null }))
+  .map(n => ({ ...n.spot, id: n.id, label: n.label, en: n.en, hint: n.hint, go: n.go,
+               page: n.slots ? n.id : null, confess: n.confess }))
 
 /* 有独立页面的模块，页面之间的上一格/下一格按这个顺序走 */
 export const pages = nodes.filter(n => n.slots)
