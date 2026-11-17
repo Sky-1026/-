@@ -5,14 +5,17 @@
    ══════════════════════════════════════════════════════════ */
 
 .mod {
-  --paper: #d9d4cb;
-  --ink: #17191d;
-  --red: #f14120;
+  /* --paper / --ink / --red 由 room.css 里 `.room, .room-layer, .mod` 统一定义，
+     这里只放模块页独有的：--line 刻意不提到 :root，
+     否则会覆盖简历深色主题自己在用的 --line。 */
   --line: rgba(23, 25, 29, .16);
   --card: #f6f2ea;
   min-height: 100dvh;
   padding: 0 clamp(14px, 3.2vw, 46px) clamp(30px, 5vw, 70px);
-  background: radial-gradient(120% 90% at 50% 0%, #cfcac1 0%, #b3aea6 62%, #9d988f 100%);
+  /* 地面刻意比房间浅一档：这页几乎没有卡片兜底的文字（页头、槽位标题、占位框）
+     都直接刷在渐变上，底越暗，同样字号的灰字就越看不清。原来的 #9d988f 会把
+     次要文字压到 2.5:1，肉眼就是"糊成一片"。现在最暗处 #c9c2b8 也保得住 4.5:1。 */
+  background: radial-gradient(120% 90% at 50% 0%, #dad5cc 0%, #d1cbbf 62%, #c9c2b8 100%);
   color: var(--ink);
   display: flex;
   flex-direction: column;
@@ -51,7 +54,7 @@
 .mod-bar > a:hover,
 .mod-bar > a:focus-visible { background: var(--red); border-color: var(--red); color: #fff; outline: none; }
 
-.mod-loc { margin-left: auto; border-style: dashed; color: #6a655d; }
+.mod-loc { margin-left: auto; border-style: dashed; color: #4a4741; }
 
 .mod-tabs { display: flex; flex-wrap: wrap; gap: 4px 2px; }
 
@@ -65,7 +68,7 @@
   transition: background .2s ease, color .2s ease;
 }
 
-.mod-tabs a:hover, .mod-tabs a:focus-visible { color: var(--red); background: rgba(241, 65, 32, .1); outline: none; }
+.mod-tabs a:hover, .mod-tabs a:focus-visible { color: var(--red-ink); background: rgba(241, 65, 32, .1); outline: none; }
 .mod-tabs a[data-on="on"] { background: var(--ink); color: #f4efe6; }
 
 /* ── 页头 ── */
@@ -79,15 +82,15 @@
   font: 400 10px / 1 'DM Mono', monospace;
   letter-spacing: .14em;
   background: rgba(38, 142, 92, .14);
-  color: #1f7a4f;
+  color: #155034;
 }
 
-.mod-status[data-ready="off"] { background: rgba(23, 25, 29, .1); color: #5a564f; }
+.mod-status[data-ready="off"] { background: rgba(23, 25, 29, .06); color: #4a4741; }
 
-.mod-kicker { display: block; margin-bottom: 8px; font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .18em; color: #6a655d; }
+.mod-kicker { display: block; margin-bottom: 8px; font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .18em; color: #4a4741; }
 .mod-head h1 { margin: 0 0 12px; font: 700 clamp(26px, 4vw, 46px) / 1.14 'Noto Sans SC', sans-serif; letter-spacing: -.015em; }
 .mod-lead { margin: 0 0 14px; font: 400 clamp(15px, 1.5vw, 18px) / 1.7 'Noto Sans SC', sans-serif; color: #3c3a36; max-width: 62ch; }
-.mod-text { margin: 0 0 11px; font: 400 14px / 1.85 'Noto Sans SC', sans-serif; color: #5a564f; max-width: 68ch; }
+.mod-text { margin: 0 0 11px; font: 400 14px / 1.85 'Noto Sans SC', sans-serif; color: #4a4741; max-width: 68ch; }
 
 /* ── 正文：槽位列表 ── */
 .mod-body {
@@ -106,7 +109,7 @@
   font: 500 12px / 1 'DM Mono', 'Noto Sans SC', monospace;
   letter-spacing: .16em;
   text-transform: uppercase;
-  color: #6a655d;
+  color: #4a4741;
 }
 
 /* ── 表：列名先站住，行等数据 ── */
@@ -129,8 +132,8 @@
 
 .mod-tr:first-child { border-top: 0; }
 .mod-tr.is-head { background: rgba(23, 25, 29, .06); }
-.mod-tr.is-head span { font: 400 10px / 1.4 'DM Mono', 'Noto Sans SC', monospace; letter-spacing: .14em; color: #6a655d; }
-.mod-empty { margin: 0; padding: 18px 16px; border-top: 1.5px dashed rgba(23, 25, 29, .22); font: 400 13px / 1.7 'Noto Sans SC', sans-serif; color: #6a655d; }
+.mod-tr.is-head span { font: 400 10px / 1.4 'DM Mono', 'Noto Sans SC', monospace; letter-spacing: .14em; color: #4a4741; }
+.mod-empty { margin: 0; padding: 18px 16px; border-top: 1.5px dashed rgba(23, 25, 29, .22); font: 400 13px / 1.7 'Noto Sans SC', sans-serif; color: #4a4741; }
 
 /* ── 链接槽位 ── */
 .mod-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
@@ -143,10 +146,10 @@
   background: var(--card);
 }
 
-.mod-links span { font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .14em; color: #837d74; min-width: 58px; }
+.mod-links span { font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .14em; color: #4f4a43; min-width: 58px; }
 .mod-links a, .mod-links strong { font: 500 15px / 1.4 'DM Mono', 'Noto Sans SC', monospace; color: var(--ink); text-decoration: none; }
 .mod-links a { border-bottom: 1.5px solid rgba(241, 65, 32, .4); }
-.mod-links a:hover { color: var(--red); }
+.mod-links a:hover { color: var(--red-ink); }
 
 /* ── 卡片：项目这种"一条有好几行"的内容 ── */
 .mod-cards { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -165,10 +168,10 @@
 
 .mod-card header { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .mod-card header h5 { margin: 0; font: 700 clamp(17px, 1.8vw, 21px) / 1.25 'Noto Sans SC', sans-serif; letter-spacing: -.01em; }
-.mod-card header em { font: 400 9px / 1.4 'DM Mono', monospace; letter-spacing: .16em; color: #837d74; font-style: normal; }
+.mod-card header em { font: 400 9px / 1.4 'DM Mono', monospace; letter-spacing: .16em; color: #4f4a43; font-style: normal; }
 
-.mod-card-no { font: 400 11px / 1 'DM Mono', monospace; letter-spacing: .1em; color: var(--red); }
-.mod-card-meta { margin: 0; font: 400 12px / 1.6 'DM Mono', 'Noto Sans SC', monospace; color: #5a564f; }
+.mod-card-no { font: 400 11px / 1 'DM Mono', monospace; letter-spacing: .1em; color: var(--red-ink); }
+.mod-card-meta { margin: 0; font: 400 12px / 1.6 'DM Mono', 'Noto Sans SC', monospace; color: #4a4741; }
 .mod-card .mod-text { margin: 0; }
 
 .mod-tags { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 0; padding: 0; }
@@ -199,8 +202,8 @@
   text-align: center;
 }
 
-.mod-frame b { font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .18em; color: #8a847b; }
-.mod-frame span { font: 400 13px / 1.7 'Noto Sans SC', sans-serif; color: #5a564f; max-width: 46ch; }
+.mod-frame b { font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .18em; color: #4a4741; }
+.mod-frame span { font: 400 13px / 1.7 'Noto Sans SC', sans-serif; color: #4a4741; max-width: 46ch; }
 
 /* ── 页脚：模块之间能连着走 ── */
 .mod-foot {

@@ -3,11 +3,20 @@
    配色：水泥灰 + 黑线 + 站点红 #f14120
    ══════════════════════════════════════════════════════════ */
 
-.room {
+/* token 必须同时定义在 portal 的根上。房间面板是 createPortal 挂到 <body> 的，
+   不是 .room 的后代；只在 .room 上声明的话，面板里的 var(--ink) 取不到值，
+   color 会退成"继承"，继承到的是简历深色主题给 body 的近白色 #f1f3f5 —
+   于是标题、关闭按钮、进入按钮全部变成浅米底上的浅白字。 */
+.room, .room-layer, .mod {
   --paper: #d9d4cb;
   --ink: #17191d;
   --red: #f14120;
-  /* contain 时上下要让出来的高度：内边距 ×2 + 一点空隙 */
+  /* 站点红只做底色和描边；一旦当字用（编号、链接 hover）就要压深一档，
+     #f14120 在米色卡上只有 3.4:1，11px 的编号几乎看不清。 */
+  --red-ink: #a82c14;
+}
+
+.room {
   --edge: calc(clamp(10px, 1.1vw, 20px) * 2 + 8px);
   min-height: 100dvh;
   display: flex;
@@ -197,7 +206,8 @@
 .room-readout[data-on="on"] { opacity: 1; transform: none; }
 
 .room-readout strong { font: 700 clamp(12px, 1.15vw, 16px) / 1 'Noto Sans SC', sans-serif; }
-.room-readout span { font: 400 clamp(9px, .82vw, 12px) / 1.3 'DM Mono', monospace; letter-spacing: .08em; color: #a9a49c; }
+/* 读数条是深色药丸，所以这里反过来要"浅字"：原来的 #a9a49c 在药丸底上只有 2.6:1。 */
+.room-readout span { font: 400 clamp(9px, .82vw, 12px) / 1.3 'DM Mono', monospace; letter-spacing: .08em; color: #d2cec6; }
 
 /* ── 窄屏兜底列表 ── */
 .room-list { display: none; }
@@ -246,7 +256,7 @@
   background: #e6e0d6;
 }
 
-.room-panel-bar span { font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .16em; color: #6a655d; }
+.room-panel-bar span { font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .16em; color: #4a4741; }
 
 .room-panel-bar button {
   font: 400 11px / 1 'DM Mono', monospace;
@@ -274,14 +284,14 @@
   font: 400 10px / 1 'DM Mono', monospace;
   letter-spacing: .14em;
   background: rgba(38, 142, 92, .14);
-  color: #1f7a4f;
+  color: #155034;
 }
 
-.room-status[data-soon="on"] { background: rgba(241, 65, 32, .13); color: #b8300f; }
+.room-status[data-soon="on"] { background: rgba(241, 65, 32, .13); color: #a02a0c; }
 
-.room-panel-body h3 { margin: 0 0 12px; font: 700 clamp(24px, 3.4vw, 40px) / 1.16 'Noto Sans SC', sans-serif; letter-spacing: -.01em; }
+.room-panel-body h3 { margin: 0 0 12px; color: var(--ink); font: 700 clamp(24px, 3.4vw, 40px) / 1.16 'Noto Sans SC', sans-serif; letter-spacing: -.01em; }
 .room-lead { margin: 0 0 16px; font: 400 clamp(15px, 1.5vw, 18px) / 1.7 'Noto Sans SC', sans-serif; color: #3c3a36; }
-.room-text { margin: 0 0 12px; font: 400 14px / 1.85 'Noto Sans SC', sans-serif; color: #5a564f; max-width: 68ch; }
+.room-text { margin: 0 0 12px; font: 400 14px / 1.85 'Noto Sans SC', sans-serif; color: #4a4741; max-width: 68ch; }
 
 .room-links { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 10px; }
 
@@ -293,10 +303,10 @@
   background: #f6f2ea;
 }
 
-.room-links span { font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .14em; color: #837d74; min-width: 58px; }
+.room-links span { font: 400 10px / 1 'DM Mono', monospace; letter-spacing: .14em; color: #4f4a43; min-width: 58px; }
 .room-links a, .room-links strong { font: 500 15px / 1.4 'DM Mono', 'Noto Sans SC', monospace; color: var(--ink); text-decoration: none; }
 .room-links a { border-bottom: 1.5px solid rgba(241, 65, 32, .4); }
-.room-links a:hover { color: var(--red); }
+.room-links a:hover { color: var(--red-ink); }
 
 .room-shots { margin-top: 26px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 
@@ -312,15 +322,15 @@
 }
 
 .room-shots img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
-.room-shots span { display: block; padding: 8px 10px 10px; font: 400 11px / 1.4 'Noto Sans SC', sans-serif; color: #5a564f; }
+.room-shots span { display: block; padding: 8px 10px 10px; font: 400 11px / 1.4 'Noto Sans SC', sans-serif; color: #4a4741; }
 
 .room-zoom { margin: 0 0 20px; }
 .room-zoom img { width: 100%; max-height: 58dvh; object-fit: contain; border-radius: 14px; background: #fff; border: 1.5px solid rgba(23, 25, 29, .18); }
-.room-zoom figcaption { display: flex; align-items: center; gap: 14px; margin-top: 10px; font: 400 11px / 1.4 'DM Mono', 'Noto Sans SC', monospace; letter-spacing: .08em; color: #6a655d; }
+.room-zoom figcaption { display: flex; align-items: center; gap: 14px; margin-top: 10px; font: 400 11px / 1.4 'DM Mono', 'Noto Sans SC', monospace; letter-spacing: .08em; color: #4a4741; }
 .room-zoom button { margin-left: auto; cursor: pointer; border: 1.5px solid rgba(23, 25, 29, .3); background: transparent; border-radius: 999px; padding: 6px 12px; font: 400 11px / 1 'DM Mono', monospace; }
 
 .room-todo { margin: 24px 0 0; padding-left: 20px; }
-.room-todo li { margin-bottom: 7px; font: 400 13px / 1.7 'Noto Sans SC', sans-serif; color: #6a655d; }
+.room-todo li { margin-bottom: 7px; font: 400 13px / 1.7 'Noto Sans SC', sans-serif; color: #4a4741; }
 .room-todo li::marker { color: var(--red); }
 
 .room-panel-foot {
@@ -342,7 +352,7 @@
 }
 
 .room-panel-foot a:hover, .room-panel-foot a:focus-visible { background: var(--red); border-color: var(--red); color: #fff; outline: none; }
-.room-panel-foot span { font: 400 11px / 1.6 'Noto Sans SC', sans-serif; color: #8a847b; }
+.room-panel-foot span { font: 400 11px / 1.6 'Noto Sans SC', sans-serif; color: #4a4741; }
 
 /* ── 响应式 ── */
 /* 铁律：舞台元素自身的比例必须始终是背景图的 1792/1024。
@@ -394,9 +404,9 @@
     color: var(--ink);
     display: grid; gap: 3px;
   }
-  .room-list small { font: 400 9px / 1 'DM Mono', monospace; letter-spacing: .14em; color: #8a847b; }
+  .room-list small { font: 400 9px / 1 'DM Mono', monospace; letter-spacing: .14em; color: #4a4741; }
   .room-list strong { font: 700 15px / 1.2 'Noto Sans SC', sans-serif; }
-  .room-list span { font: 400 11px / 1.4 'Noto Sans SC', sans-serif; color: #6a655d; }
+  .room-list span { font: 400 11px / 1.4 'Noto Sans SC', sans-serif; color: #4a4741; }
   .room-shots { grid-template-columns: repeat(2, 1fr); }
 }
 
