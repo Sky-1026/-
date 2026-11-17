@@ -7,14 +7,14 @@
   --paper: #d9d4cb;
   --ink: #17191d;
   --red: #f14120;
-  /* 画面上下要让出来的高度：内边距 ×2 + 索引那一行 + gap。
-     房间按这个余量把画面撑到窗口允许的最大。 */
-  --chrome: calc(clamp(10px, 1.1vw, 20px) * 2 + 46px);
+  /* contain 时上下要让出来的高度：内边距 ×2 + 一点空隙 */
+  --edge: calc(clamp(10px, 1.1vw, 20px) * 2 + 8px);
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 12px;
+  align-items: center;
+  gap: 14px;
   padding: clamp(10px, 1.1vw, 20px);
   background:
     radial-gradient(120% 90% at 50% 0%, #cfcac1 0%, #b3aea6 62%, #9d988f 100%);
@@ -32,10 +32,14 @@
 /* ── 舞台 ── */
 .room-stage {
   position: relative;
+  /* 不许被 flex 压扁：压扁后框的比例就不再是 1.75，
+     object-fit: cover 会在框内裁掉画面，热区百分比又会对不上纸上的位置。 */
+  flex-shrink: 0;
   /* 撑到窗口允许的最大，但比例始终是背景图的 1792/1024：
      宽度取「窗口宽」和「可用高 × 1.75」里小的那个，高度由 aspect-ratio 反推。
      这样永远不会裁画面，热区百分比也就一直对得上纸上画的位置。 */
-  width: min(100%, max(320px, calc((100dvh - var(--chrome)) * 1.75)));
+  /* 默认 contain：撑到窗口允许的最大，比例始终是背景图的 1792/1024 */
+  width: min(100%, max(320px, calc((100dvh - var(--edge)) * 1.75)));
   margin: 0 auto;
   aspect-ratio: 1792 / 1024;
   border-radius: 22px;
@@ -332,38 +336,27 @@
 .room-panel-foot a:hover, .room-panel-foot a:focus-visible { background: var(--red); border-color: var(--red); color: #fff; outline: none; }
 .room-panel-foot span { font: 400 11px / 1.6 'Noto Sans SC', sans-serif; color: #8a847b; }
 
-/* ── 房间下方的文字索引：墙上只有九个姿势，其余格子从这里进 ── */
-.room-index {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 4px 22px;
-  width: 100%;
-  /* 和舞台同一个算法，索引这一行的宽度跟着画面对齐 */
-  max-width: min(100%, max(320px, calc((100dvh - var(--chrome)) * 1.75)));
-  margin: 0 auto;
-}
-
-.room-index a {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 7px;
-  font: 400 13px / 1 'Noto Sans SC', sans-serif;
-  color: #2b2d31;
-  text-decoration: none;
-  padding: 6px 2px;
-  border-bottom: 1.5px solid transparent;
-  transition: color .2s ease, border-color .2s ease;
-}
-
-.room-index a:hover, .room-index a:focus-visible { color: var(--red); border-bottom-color: var(--red); outline: none; }
-.room-index small { font: 400 9px / 1 'DM Mono', monospace; letter-spacing: .14em; color: #7d776f; }
-.room-index a:hover small { color: var(--red); }
-
 /* ── 响应式 ── */
-/* 注意：舞台比例必须始终等于背景图的 1792/1024。
-   一旦改成别的比例，object-fit: cover 会把画面左右裁掉，
-   热区的百分比就对不上纸上画的位置了。 */
+/* 铁律：舞台元素自身的比例必须始终是背景图的 1792/1024。
+   比例一变，object-fit: cover 就把画面边缘裁掉，热区百分比就对不上纸上画的位置。
+   下面"铺满整屏"走的是另一条路：画布仍然保持 1792/1024，
+   只是让它比窗口大一圈、多出来的部分等量裁掉——
+   被裁的是画面的边，热区跟着画一起缩放，所以不会错位。 */
+
+/* 桌面且窗口比例接近画面比例：房间独占这一屏，无边框、不滚动。
+   1.68—1.85 是算出来的：超出这个带子，被裁掉的边会啃到左下角读数条
+   和右下角联系条（它们离边 2.4%），所以更极端的窗口仍走 contain。 */
+@media (min-width: 621px) and (min-aspect-ratio: 1.68 / 1) and (max-aspect-ratio: 1.85 / 1) {
+  .room { height: 100dvh; min-height: 0; padding: 0; gap: 0; overflow: hidden; }
+
+  .room-stage {
+    width: max(100vw, calc(100dvh * 1.75));
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
 @media (max-width: 900px) {
   .room-figure { left: 48%; width: 33.8%; bottom: 10.4%; }
   .room-readout { max-width: 74%; }
@@ -379,8 +372,6 @@
   .room-note-text { opacity: 0; }
   .room-hot.is-note::before { border-color: rgba(241, 65, 32, .42); background: rgba(241, 65, 32, .07); }
   .room-readout { display: none; }
-  /* 索引和入口列表功能重叠，窄屏只留卡片列表 */
-  .room-index { display: none; }
   .room-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));

@@ -157,15 +157,6 @@ export default function Room() {
         </div>
       </div>
 
-      {/* 文字索引：墙上只放得下九件物品，剩下的格子（文件柜、联系）从这里进 */}
-      <nav className="room-index" aria-label="全部模块">
-        {entries.map(n => (
-          <a key={n.id} href={n.go || `#/${n.id}`}>
-            {n.label}<small>{n.slots && !isReady(n) ? '待填' : n.en}</small>
-          </a>
-        ))}
-      </nav>
-
       {/* 窄屏兜底：房间还是那张图，但入口再给一份可点列表 */}
       <nav className="room-list" aria-label="模块入口">
         {entries.map(n => (
