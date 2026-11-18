@@ -218,10 +218,14 @@
   padding: 10px 14px;
   border-radius: 999px;
   border: 1.5px solid rgba(23, 25, 29, .26);
+  background: transparent;
   color: var(--ink);
+  cursor: pointer;
   transition: background .2s ease, color .2s ease, border-color .2s ease;
 }
+.confess-open i { font-style: normal; opacity: .6; margin-left: 4px; }
 .confess-open:hover, .confess-open:focus-visible { background: var(--red); border-color: var(--red); color: #fff; outline: none; }
+.confess-open:hover i, .confess-open:focus-visible i { opacity: .85; }
 .confess-act span { font: 400 11px / 1.4 'DM Mono', 'Noto Sans SC', monospace; letter-spacing: .08em; color: #4a4741; }
 .confess-note { margin: 12px 0 0; font: 400 12px / 1.7 'Noto Sans SC', sans-serif; color: #4a4741; }
 

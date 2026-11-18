@@ -99,8 +99,8 @@ export function ConfessOverlay({ onClose }) {
   )
 }
 
-/* 表白块：挂在 #/likes。计数只在本机，链接直接开那一整页爱心。 */
-export function ConfessBox({ data }) {
+/* 表白块：挂在 #/likes。计数只在本机；打开完整爱心走的是房间那颗心同一个全屏层。 */
+export function ConfessBox({ data, onOpen }) {
   const [n, bump] = useCount()
 
   return (
@@ -112,7 +112,7 @@ export function ConfessBox({ data }) {
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d={HEART}/></svg>
           按一颗心
         </button>
-        {data.url && <a className="confess-open" href={data.url} target="_blank" rel="noopener">打开完整爱心 ↗</a>}
+        <button type="button" className="confess-open" onClick={onOpen}>打开完整爱心 <i>↗</i></button>
         <span aria-live="polite">本机已按 {n} 颗</span>
       </div>
       <p className="confess-note">{data.note}</p>

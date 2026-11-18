@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { byId, pageIds, nodes, isReady, slotsOf } from './modules'
 import Shots, { Placeholder } from './Shots'
-import { ConfessBox } from './Confess'
+import { ConfessBox, ConfessOverlay } from './Confess'
 
 /* ── 单个槽位：类型定版式，以后只往 items 里加东西 ── */
 function Slot({ s }) {
@@ -92,7 +92,8 @@ function Slot({ s }) {
 /* ── 模块页外壳：每个模块都是 #/<id>，结构一模一样 ── */
 export default function ModulePage({ id }) {
   const m = byId[id]
-  useEffect(() => { window.scrollTo(0, 0) }, [id])
+  const [overlay, setOverlay] = useState(false)
+  useEffect(() => { window.scrollTo(0, 0); setOverlay(false) }, [id])
   if (!m) return null
 
   const ready = isReady(m)
@@ -120,7 +121,7 @@ export default function ModulePage({ id }) {
         <h1>{m.title}</h1>
         <p className="mod-lead">{m.lead}</p>
         {m.body?.map((t, k) => <p className="mod-text" key={k}>{t}</p>)}
-        {m.confess && <ConfessBox data={m.confess}/>}
+        {m.confess && <ConfessBox data={m.confess} onOpen={() => setOverlay(true)}/>}
       </div>
 
       <div className="mod-body">
@@ -132,6 +133,8 @@ export default function ModulePage({ id }) {
         <a href="#/">回房间</a>
         <a href={`#/${next.id}`}>{next.label} →</a>
       </nav>
+
+      {overlay && <ConfessOverlay onClose={() => setOverlay(false)}/>}
     </main>
   )
 }

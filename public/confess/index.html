@@ -74,6 +74,17 @@
   .lb-figure figcaption{margin-top:12px;color:#ffd9e3;letter-spacing:.2em;font-size:14px;}
   #lb-count{margin-left:14px;color:#e89aae;font-size:12px;letter-spacing:.1em;}
   @media (max-width:640px){.lb-prev{left:6px;}.lb-next{right:6px;}}
+  /* 单独打开这一页（比如链接直接发给别人）时才有：被房间全屏挂着时不出现 */
+  .home{
+    position:fixed;left:18px;top:18px;z-index:10;display:none;
+    background:rgba(255,77,109,.12);border:1px solid rgba(255,92,138,.45);
+    color:#ffc2d1;border-radius:999px;padding:9px 16px;font-size:13px;
+    letter-spacing:.1em;cursor:pointer;text-decoration:none;backdrop-filter:blur(6px);
+    transition:background .2s,transform .2s;
+  }
+  .home.show{display:block;}
+  .home:hover{background:rgba(255,77,109,.28);transform:translateY(-1px);}
+  .home:focus-visible{outline:2px solid var(--pink);outline-offset:2px;}
   @media (prefers-reduced-motion: reduce){
     .caption,.signature{animation:none;opacity:1;}
   }
@@ -84,6 +95,7 @@
 <div class="caption">我把想说的话，都藏进这颗心里</div>
 <div class="signature">—— 想你的每一天</div>
 <button class="replay" id="replay" type="button">再看一次</button>
+<a class="home" id="home" href="/#/">← 我的房间</a>
 <audio id="bgm" loop preload="auto" src="bgm.mp3"></audio>
 <button class="music-btn" id="musicBtn" type="button" aria-label="播放背景音乐" aria-pressed="false">
   <svg class="ic-on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
@@ -511,6 +523,14 @@ var BAKED_FILL = [[-0.846,0.007],[-0.670,0.007],[-0.318,0.007],[0.122,-0.630],[0
 
   resize();
   requestAnimationFrame(frame);
+})();
+</script>
+<script>
+/* 只有这一页被单独打开时才给一个回房间的口；
+   房间里是用全屏 iframe 挂着它的，那时候左上角那颗药丸归外层画，这里不能重复出现。 */
+(function(){
+  var standalone = window.top === window.self && /^https?:$/.test(location.protocol);
+  if (standalone) document.getElementById("home").className = "home show";
 })();
 </script>
 </body>

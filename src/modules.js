@@ -110,7 +110,6 @@ export const nodes = [
       kicker: 'CONFESS / 表白',
       text: '这颗心是画上去的，喜欢不是。按一下就当你知道。',
       note: '计数只存在你这台设备的浏览器里（localStorage），不是全站数字——静态站没有后端，要共享得再接一层。',
-      url: '/confess/index.html',
     },
     slots: [
       { type: 'list', title: '清单', columns: ['类别', '内容', '为什么留下'], items: [],
