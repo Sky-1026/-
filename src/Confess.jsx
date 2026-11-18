@@ -2,21 +2,39 @@ import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 const KEY = 'lxj.heart.confess'
+const API = '/api/heart'
 const reduce = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
 
-/* 本机计数：静态站没有后端，所以这个数字只属于当前这台设备的浏览器。
-   文案里必须把这句话写出来，不能让它看起来像全站统计。 */
+/* 本机数一直在（localStorage，不依赖后端）；全站数看 /api/heart。
+   读不到就当没有，标签只写本机那颗数，不能让人把两个数当成一件事。 */
 function useCount() {
-  const [n, setN] = useState(0)
+  const [local, setLocal] = useState(0)
+  const [total, setTotal] = useState(null)
+
   useEffect(() => {
-    try { setN(Math.max(0, parseInt(localStorage.getItem(KEY) || '0', 10) || 0)) } catch { /* 隐私模式下读不到，就当 0 */ }
+    try { setLocal(Math.max(0, parseInt(localStorage.getItem(KEY) || '0', 10) || 0)) } catch { /* 隐私模式下读不到，就当 0 */ }
+    let live = true
+    fetch(API)
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then(d => { if (live && Number.isFinite(d.total)) setTotal(d.total) })
+      .catch(() => { if (live) setTotal(null) })
+    return () => { live = false }
   }, [])
-  const bump = () => setN(v => {
-    const t = v + 1
-    try { localStorage.setItem(KEY, String(t)) } catch { /* 写不进去也不拦着按 */ }
-    return t
-  })
-  return [n, bump]
+
+  const bump = () => {
+    setLocal(v => {
+      const t = v + 1
+      try { localStorage.setItem(KEY, String(t)) } catch { /* 写不进去也不拦着按 */ }
+      return t
+    })
+    if (total === null) return
+    fetch(API, { method: 'POST' })
+      .then(r => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then(d => setTotal(Number.isFinite(d.total) ? d.total : null))
+      .catch(() => setTotal(null))
+  }
+
+  return { local, total, bump }
 }
 
 const HEART = 'M12 20.8s-7.2-4.4-9.2-8.9C.9 8.6 2.8 5.3 6.2 5.3c1.9 0 3.3 1 4.3 2.4 1-1.4 2.4-2.4 4.3-2.4 3.4 0 5.3 3.3 3.4 6.6-2 4.5-9.2 8.9-9.2 8.9z'
@@ -99,12 +117,12 @@ export function ConfessOverlay({ onClose }) {
   )
 }
 
-/* 表白块：挂在 #/likes。计数只在本机；打开完整爱心走的是房间那颗心同一个全屏层。 */
+/* 表白块：挂在 #/likes。后端接上时同时显示本机数和全站数，没接上只显示本机数。 */
 export function ConfessBox({ data, onOpen }) {
-  const [n, bump] = useCount()
+  const { local, total, bump } = useCount()
 
   return (
-    <section className="confess" data-pop={n ? 'on' : 'off'}>
+    <section className="confess" data-pop={local ? 'on' : 'off'}>
       <h4>{data.kicker}</h4>
       <p className="confess-line">{data.text}</p>
       <div className="confess-act">
@@ -113,7 +131,9 @@ export function ConfessBox({ data, onOpen }) {
           按一颗心
         </button>
         <button type="button" className="confess-open" onClick={onOpen}>打开完整爱心 <i>↗</i></button>
-        <span aria-live="polite">本机已按 {n} 颗</span>
+        <span aria-live="polite">
+          {total === null ? `本机 ${local} 颗` : `本机 ${local} 颗 · 全站 ${total} 颗`}
+        </span>
       </div>
       <p className="confess-note">{data.note}</p>
     </section>

@@ -109,7 +109,7 @@ export const nodes = [
     confess: {
       kicker: 'CONFESS / 表白',
       text: '这颗心是画上去的，喜欢不是。按一下就当你知道。',
-      note: '计数只存在你这台设备的浏览器里（localStorage），不是全站数字——静态站没有后端，要共享得再接一层。',
+      note: '全站那颗数存在站点自己的 Cloudflare KV 里，就一个键、没有数据库；接口没接上时只显示本机数，本机数存在这台设备的浏览器里（localStorage）。',
     },
     slots: [
       { type: 'list', title: '清单', columns: ['类别', '内容', '为什么留下'], items: [],
